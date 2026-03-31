@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  --color-flx-dark: #FFFFFF;
+  --color-flx-card: #FAFAFA;
+  --color-flx-card-hover: #F4F4F5;
+  --color-flx-teal: #000000;
+  --color-flx-teal-muted: rgba(0, 0, 0, 0.05);
+  --color-flx-text: #18181B;
+  --color-flx-text-muted: #71717A;
+  --color-flx-border: #E4E4E7;
+  
+  --font-sans: var(--font-inter);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: var(--color-flx-dark);
+  --foreground: var(--color-flx-text);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-flx-card/80 backdrop-blur-md border border-flx-border text-flx-text;
+  }
 }

@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // Uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Uses a direct connection
+}
+
+// User Profile & Authentication
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?   // Added for organic login
+  phoneNumber   String?
+  role          UserRole  @default(CLIENT)
+  points        Int       @default(0)
+  tier          TierRank  @default(FLEX)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  bookings      Booking[]
+
+  // For Outlet Managers only
+  managedLocationId String?
+  managedLocation   Location? @relation("OutletManager", fields: [managedLocationId], references: [id])
+}
+
+// Service Catalog
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  duration    Int      // in minutes
+  price       Int      // IDR pricing
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  bookings    Booking[]
+}
+
+// Physical Outlets/Locations
+model Location {
+  id          String   @id @default(uuid())
+  name        String
+  address     String
+  mapLink     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  bookings    Booking[]
+  managers    User[]   @relation("OutletManager")
+  staff       Flexologist[] @relation("OutletStaff")
+}
+
+// Staff / Flexologists
+model Flexologist {
+  id              String   @id @default(uuid())
+  name            String
+  rating          Float    @default(5.0)
+  bio             String?
+  isActive        Boolean  @default(true)
+  imageUrl        String?
+  
+  canHomeService  Boolean  @default(false)
+  
+  locationId      String?
+  location        Location? @relation("OutletStaff", fields: [locationId], references: [id])
+  
+  bookings        Booking[]
+}
+
+// Core Booking Model
+model Booking {
+  id              String      @id @default(uuid())
+  mode            ServiceMode
+  status          BookingStatus @default(PENDING)
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  
+  serviceId       String
+  service         Service     @relation(fields: [serviceId], references: [id])
+  
+  flexologistId   String?
+  flexologist     Flexologist? @relation(fields: [flexologistId], references: [id])
+  
+  // Outlet specific
+  locationId      String?
+  location        Location?    @relation(fields: [locationId], references: [id])
+  
+  // At-Home specific
+  homeAddress     String?
+  homeMapLink     String?
+
+  // Time & Cost
+  scheduledDate   DateTime
+  totalPrice      Int
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// Enums
+enum UserRole {
+  CLIENT
+  FLEXOLOGIST
+  OUTLET_MANAGER
+  SUPER_ADMIN
+}
+
+enum TierRank {
+  FLEX
+  FLEX_PLUS
+  PREMIUM
+}
+
+enum ServiceMode {
+  OUTLET
+  HOME
+  VENUE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: flexology_db
+    restart: always
+    environment:
+      POSTGRES_USER: flexadmin
+      POSTGRES_PASSWORD: local_password123
+      POSTGRES_DB: flexology
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - flex_network
+
+  # Database Admin UI (Optional but recommended)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: flexology_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@flexology.local
+      PGADMIN_DEFAULT_PASSWORD: local_password123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - flex_network
+
+volumes:
+  postgres_data:
+
+networks:
+  flex_network:
+    driver: bridge

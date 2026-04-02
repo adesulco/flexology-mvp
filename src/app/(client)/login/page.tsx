@@ -23,8 +23,8 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-white">
-      <div className="w-16 h-16 bg-black flex items-center justify-center rounded-2xl mb-8 shadow-xl">
-        <Copyleft className="w-8 h-8 text-flx-teal" />
+      <div className="w-20 h-20 bg-black flex items-center justify-center rounded-2xl mb-8 shadow-xl overflow-hidden p-3 border border-gray-800">
+        <img src="/logo.png" alt="Flexology" className="w-full h-full object-contain" />
       </div>
       <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome Back</h1>
       <p className="text-sm text-flx-text-muted mb-8 text-center max-w-[280px]">Enter your mobile number and password to access your Flexology account.</p>

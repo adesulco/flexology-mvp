@@ -1,0 +1,449 @@
+
+QUALITY AUDIT REPORT
+Flexology | Mobile Booking System
+
+Product URL
+https://flex.jemariapp.com/
+Audit Date
+April 2, 2026
+Auditor
+QA Engineering Review Team
+
+Release Readiness Score
+38/100
+Recommendation
+NO-GO FOR RELEASE
+Critical and High Issues Must Be Resolved First
+
+Executive Summary
+Overall Quality Rating: At Risk
+This comprehensive quality audit of Flexology Mobile Booking System identifies critical issues that prevent release to a wider audience. The application demonstrates a modern tech stack (Next.js with React Server Components, PWA architecture) but suffers from significant functional, security, and accessibility deficiencies.
+Key Findings:
+	•	Desktop viewport completely broken: homepage content invisible on viewports wider than 430px (affects 100% of desktop/tablet users)
+	•	Production payment gateway in SANDBOX mode: users may believe payments processed when they haven't
+	•	No Content Security Policy header: vulnerability to XSS and code injection attacks
+	•	Data inconsistencies: FLX Points (0 vs 10,000), membership tier (FLEX vs EXPLORER)
+	•	Broken booking flow: unavailable time slots allowed, causing errors in Step 4
+	•	Intermittent 503 server errors on core routes
+	•	WCAG 2.1 AA compliance at 40%: zoom disabled, no ARIA roles, heading hierarchy broken
+Recommendation: DO NOT release to wider audience until all Critical and High issues are resolved. Estimated effort: 2-3 sprints for full remediation.
+
+1. Functional Quality (Bug Finding)
+Rating: FAIL
+BUG-001: Homepage Content Invisible on Desktop (Critical, S1)
+	•	Severity: Critical
+	•	Reproducibility: 100% (all desktop/tablet users)
+	•	Content exists in DOM but not rendered visually on viewports wider than ~430px
+	•	Steps to Reproduce: Open https://flex.jemariapp.com/ on any desktop browser at default width
+	•	Expected: All homepage content visible
+	•	Actual: Page appears completely empty with only header and footer visible
+BUG-002: FLX Points Data Inconsistency (Major, S2)
+	•	Header consistently shows: FLX POINTS: 0
+	•	Rewards page body shows: Available Balance: 10,000 FLX
+	•	Profile page shows: 10,000 AVAILABLE FLX POINTS
+	•	Home page (mobile width) shows: FLX POINTS: 10,000 in header
+BUG-003: Membership Tier Inconsistency (Major, S2)
+	•	Profile page shows: FLEX TIER badge and Current Tier: FLEX
+	•	Rewards page shows: EXPLORER TIER with 0 TO GOLD progress bar
+BUG-004: Booking Flow Allows Unavailable Time Slots (Major, S2)
+	•	Step 3 (Book Time) shows all time slots as available (e.g., 08:00)
+	•	Step 4 (Select Flexologist) then shows error: No therapists are currently On-Duty for your configured 08:00 session block
+	•	Continue button disabled, forcing user to go back
+BUG-005: 503 Server Errors During Navigation (Major, S2)
+	•	Multiple RSC (React Server Component) routes returning HTTP 503
+	•	Affected routes: /profile?_rsc=p37cr, /bookings?_rsc=p37cr, /?_rsc=p37cr, /rewards?_rsc=p37cr
+BUG-006: Logo Loaded Redundantly (Minor, S3)
+	•	/logo.png requested 4 separate times during a single session (caching issue)
+BUG-007: Homepage/Bookings Data Mismatch (Minor, S3)
+	•	Home page Upcoming section: No upcoming sessions
+	•	Bookings page: Shows confirmed Assisted Stretching session for Apr 2
+2. App Quality Audit & Improvements
+Rating: AT RISK
+Tech Stack Analysis
+	•	Framework: Next.js with React Server Components (modern, good choice)
+	•	PWA: Service Worker registered successfully
+	•	Payment: Midtrans payment gateway (SANDBOX mode detected)
+	•	30 script tags loaded on homepage (heavy JavaScript bundle)
+	•	Multiple base64-encoded images inline (inefficient vs proper asset URLs)
+	•	Next.js turbopack detected in chunk names
+Recommendations
+Recommendation
+Impact
+Effort
+Priority
+Switch Midtrans from sandbox to production
+Critical
+Quick Win
+P1
+Implement responsive design for desktop viewports
+Critical
+Moderate
+P1
+Fix data synchronization for points/tier display
+High
+Quick Win
+P1
+Reduce script bundle — code split and lazy load non-critical JS
+High
+Moderate
+P2
+Replace base64 images with optimized image assets
+Medium
+Moderate
+P2
+Implement proper caching headers for static assets
+Medium
+Quick Win
+P2
+Fix 503 errors — investigate server capacity/configuration
+High
+Moderate
+P1
+
+3. Security Assessment
+Rating: FAIL
+SEC-001: Midtrans SANDBOX Payment Gateway in Production (Critical)
+	•	Script loads from: https://app.sandbox.midtrans.com/snap/snap.js
+	•	Impact: Users may believe payments processed when they haven't; sandbox credentials could be exploited
+SEC-002: No Content Security Policy (CSP) Header (High)
+	•	App vulnerable to XSS and code injection attacks
+SEC-003: Viewport Zoom Blocked (Medium)
+	•	maximum-scale=1 in viewport meta tag prevents pinch-to-zoom (security and accessibility concern)
+SEC-004: No ARIA Roles (Medium)
+	•	Zero ARIA roles detected across application; screen readers cannot properly parse interface
+SEC-005: UUID Referral Code Exposed (Low)
+	•	Referral codes formatted as UUIDs (e.g., e5eb5388-b768-4717-95c0-29bd8140d785) reveal internal system structure
+Security Headers Checklist
+Header
+Status
+Content-Security-Policy
+NOT SET
+X-Frame-Options
+Could not verify (likely missing)
+X-Content-Type-Options
+Could not verify (likely missing)
+Strict-Transport-Security
+Could not verify (likely missing)
+HTTPS enforced
+Yes
+Service Worker
+Registered
+
+4. Performance & Speed
+Rating: AT RISK
+Core Web Vitals
+Metric
+Value
+Threshold
+Rating
+TTFB
+402ms
+< 600ms
+Good
+DOM Content Loaded
+505ms
+< 1000ms
+Good
+Page Load Complete
+507ms
+< 3000ms
+Good
+Transfer Size
+35.8 KB
+< 100 KB
+Good
+Total Resources
+21
+< 30
+Acceptable
+FCP/LCP
+Not measurable
+N/A
+FAIL
+
+Performance Issues
+	•	30 script tags on homepage — excessive JavaScript
+	•	Multiple base64-encoded images (6+ data URIs) — bloats HTML
+	•	Logo image loaded 4 times redundantly
+	•	503 errors indicate intermittent backend capacity issues
+	•	No visible image optimization (Next.js Image not detected)
+Optimization Recommendations
+	•	Enable gzip/brotli compression for API responses
+	•	Implement proper image optimization with next/image
+	•	Code-split JavaScript bundles — lazy load non-critical modules
+	•	Fix logo caching to prevent redundant downloads
+	•	Investigate and fix 503 errors (server scaling/config issue)
+5. UX Evaluation (Nielsen's 10 Heuristics)
+Rating: AT RISK (Average Score: 2.1/4)
+#
+Heuristic
+Score
+Key Findings
+1
+Visibility of System Status
+2/4
+Progress indicator present; urgency indicator shows '24 people looking'
+2
+Match Between System and Real World
+1/4
+Good wellness terminology; 'Flexologist' clear; IDR currency appropriate
+3
+User Control and Freedom
+3/4
+Back button present but no modify/cancel booking option
+4
+Consistency and Standards
+3/4
+Inconsistent FLX Points and tier naming across pages
+5
+Error Prevention
+3/4
+Allows unavailable slots; no confirmation before booking
+6
+Recognition Rather Than Recall
+1/4
+Quick Rebook good; clear service descriptions with pricing
+7
+Flexibility and Efficiency
+2/4
+Quick Rebook feature good; no search/filter; no shortcuts
+8
+Aesthetic and Minimalist Design
+1/4
+Clean design; good cards and white space; Recovery Pass contrast works
+9
+Error Recognition and Recovery
+3/4
+Therapist error clear but appears too late; no suggestions offered
+10
+Help and Documentation
+2/4
+Help & Support link present; no onboarding; no tooltips
+
+6. Accessibility Compliance (WCAG 2.1 AA)
+Rating: FAIL (40% Compliant)
+Perceivable
+	•	Color contrast: Very low contrast observed on booking flow (light gray on white)
+	•	13 elements with font size below 12px
+	•	Alt text on images: All images rendered via CSS/base64
+Operable
+	•	Zoom blocked: maximum-scale=1 in viewport meta tag (WCAG 1.4.4 violation)
+	•	Skip navigation: NOT present
+	•	Focus indicators: Default browser focus only
+Understandable
+	•	Heading hierarchy: H1 → H3 (skips H2 in places)
+	•	Predictable navigation: Bottom nav consistent across pages
+Robust
+	•	ARIA roles: ZERO ARIA roles used anywhere
+	•	1 button without accessible text/aria-label
+	•	No aria-live regions for dynamic content updates
+7. API Quality
+Rating: AT RISK
+Observed Endpoints
+Endpoint
+Method
+Status
+Notes
+/api/user/points
+GET
+200
+Returns user points data
+/api/locations
+GET
+200
+Returns outlet locations
+/api/services
+GET
+200
+Returns service catalog
+/api/flexologists
+GET
+200
+Returns therapist data
+
+Issues
+	•	RSC routes (/profile, /bookings, /, /rewards with _rsc parameter) returning 503 intermittently
+	•	No visible rate limiting headers
+	•	No API versioning observed (no /v1/ prefix)
+	•	All endpoints appear to be GET — no CRUD operations observed from client
+8. Gamification & Interactive Features
+Rating: AT RISK
+Features Identified
+	•	Zen Garden: Interactive wellness visualization with levels (Level 4 Sanctuary observed)
+	•	Recovery Pass (Battle Pass): Level-based progression system with XP (40,000 XP to Level 2)
+	•	Trophy Cabinet: 5 badges available (First Start, Regular, Early Bird, Explorer, Legend)
+	•	Wellness Streak: Feature visible with Streak Shields (purpose unclear)
+Issues
+	•	Zen Garden shows Level 4 Sanctuary with only 1 session — level seems inflated
+	•	Battle Pass shows ULTIMATE tier requiring 950,000 XP with unclear progression path
+	•	No onboarding for gamification — users won't understand XP, badges, streaks without guidance
+9. Test Case Recommendations
+Top 20 priority test cases for remediation efforts:
+#
+Priority
+Test Case
+Type
+Status
+TC-001
+P1
+Verify homepage renders on desktop viewports (1024px+)
+Functional
+Open
+TC-002
+P1
+Verify FLX Points value consistent across all pages
+Functional
+Open
+TC-003
+P1
+Verify membership tier consistent across Profile and Rewards
+Functional
+Open
+TC-004
+P1
+Verify payment processes through production Midtrans (not sandbox)
+Security
+Open
+TC-005
+P1
+Verify booking flow end-to-end with available therapist
+Functional
+Open
+TC-006
+P1
+Verify unavailable time slots are greyed out in Step 3
+Functional
+Open
+TC-007
+P1
+Verify no 503 errors during normal page navigation
+Functional
+Open
+TC-008
+P2
+Verify home page Upcoming section syncs with Bookings data
+Functional
+Open
+TC-009
+P2
+Verify CSP headers present in HTTP response
+Security
+Open
+TC-010
+P2
+Verify user can zoom page on mobile (remove maximum-scale=1)
+Accessibility
+Open
+TC-011
+P2
+Verify all buttons have accessible text/aria-labels
+Accessibility
+Open
+TC-012
+P2
+Verify heading hierarchy follows proper H1 → H2 → H3 order
+Accessibility
+Open
+TC-013
+P2
+Verify color contrast meets WCAG 4.5:1 ratio on all text
+Accessibility
+Open
+TC-014
+P2
+Verify booking cancellation/modification flow exists
+Functional
+Open
+TC-015
+P3
+Verify Quick Rebook flow completes successfully
+Functional
+Open
+TC-016
+P3
+Verify referral code Copy button works
+Functional
+Open
+TC-017
+P3
+Verify Share via WhatsApp opens correct deep link
+Functional
+Open
+TC-018
+P3
+Verify Zen Garden reflects actual user progress
+Functional
+Open
+TC-020
+P4
+Verify Personal Information section expands and shows user data
+Functional
+Open
+
+10. Quality Metrics & Release Readiness
+Release Readiness Score: 38/100
+Recommendation: NO-GO FOR RELEASE
+Audit Area
+Rating
+Score
+Functional Quality
+FAIL
+30/100
+App Quality & Architecture
+AT RISK
+50/100
+Security
+FAIL
+25/100
+Performance & Speed
+AT RISK
+60/100
+UX (Nielsen's Heuristics)
+AT RISK
+48/100
+Accessibility (WCAG 2.1 AA)
+FAIL
+30/100
+API Quality
+AT RISK
+55/100
+Gamification Features
+AT RISK
+40/100
+
+Justification for NO-GO
+	•	3 areas rated FAIL (Functional, Security, Accessibility)
+	•	Critical security issue: Sandbox payment gateway in production
+	•	Critical rendering bug: Desktop users see empty homepage
+	•	Multiple data inconsistencies undermine user trust
+	•	WCAG compliance below minimum threshold (40% vs 80% required)
+Top 5 Quick Wins (High Impact, Low Effort)
+	•	Switch Midtrans from sandbox to production (Critical security fix)
+	•	Fix FLX Points data source to show consistent value across all pages
+	•	Remove maximum-scale=1 from viewport meta tag (accessibility fix)
+	•	Fix desktop viewport rendering (likely a CSS max-width or container issue)
+	•	Add ARIA labels to buttons without accessible text
+Strategic Remediation Roadmap
+Immediate (This Week)
+	•	Execute all 5 quick wins above
+Next Sprint (1-2 Weeks)
+	•	Fix 503 errors — investigate server capacity/configuration
+	•	Add CSP headers and remaining security headers
+	•	Fix heading hierarchy (H1 → H2 → H3 → H4)
+	•	Filter unavailable booking times from Step 3 display
+	•	Sync Upcoming section data with Bookings page
+Next Quarter
+	•	Full WCAG 2.1 AA compliance (color contrast, ARIA regions, focus management)
+	•	Performance optimization (bundle splitting, image optimization)
+	•	Add booking modification/cancellation flow
+	•	Gamification onboarding (tooltips, tutorials for XP, badges, streaks)
+	•	Add error monitoring and logging infrastructure
+Future Enhancements
+	•	Desktop-optimized layout (not just mobile-centered design)
+	•	API versioning (/v1/, /v2/) for backward compatibility
+	•	Rate limiting and request throttling
+	•	Load testing to prevent 503 errors under peak traffic
+	•	Internationalization (i18n) support for multiple languages/regions
+
+
+END OF REPORT

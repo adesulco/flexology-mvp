@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getTenant } from '@/lib/tenant'
 
 export async function GET() {
   try {
+    const tenant = await getTenant()
     const services = await prisma.service.findMany({
-      where: { isActive: true },
+      where: { isActive: true, tenantId: tenant?.id },
       orderBy: { price: 'asc' }
     })
     

@@ -15,7 +15,7 @@ export function Navigation() {
   ];
 
   return (
-    <div className="absolute bottom-0 w-full bg-white/90 backdrop-blur-lg border-t border-flx-border pb-safe pt-2 px-6 z-50">
+    <div className="sticky bottom-0 w-full bg-white/90 backdrop-blur-lg border-t border-flx-border pb-safe pt-2 px-6 z-50">
       <div className="flex justify-between items-center mb-6 mt-1">
         {tabs.map((tab) => {
           const isActive = pathname === tab.href || (tab.href !== "/" && pathname.startsWith(tab.href));

@@ -9,6 +9,8 @@ export interface Location {
   distance: string;
   type: ServiceMode;
   mapLink?: string;
+  openTime?: string;
+  closeTime?: string;
 }
 
 export interface Service {
@@ -26,6 +28,9 @@ export interface Flexologist {
   reviews: number;
   specialty: string[];
   imageUrl: string;
+  isOnDuty?: boolean;
+  shiftStart?: string;
+  shiftEnd?: string;
 }
 
 interface BookingState {

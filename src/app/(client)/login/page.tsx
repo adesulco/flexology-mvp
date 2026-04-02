@@ -27,14 +27,14 @@ export default function LoginPage() {
         <Copyleft className="w-8 h-8 text-flx-teal" />
       </div>
       <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome Back</h1>
-      <p className="text-sm text-flx-text-muted mb-8 text-center max-w-[280px]">Enter your email and password to access your Flexology account.</p>
+      <p className="text-sm text-flx-text-muted mb-8 text-center max-w-[280px]">Enter your mobile number and password to access your Flexology account.</p>
 
       {error && <div className="p-3 w-full bg-red-50 text-red-600 rounded-xl mb-4 text-sm font-medium text-center border border-red-100">{error}</div>}
 
       <form onSubmit={handleSubmit} className="w-full space-y-4">
         <div>
-          <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Email</label>
-          <input type="email" name="email" required className="w-full mt-1 p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="you@example.com" />
+          <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Mobile Number</label>
+          <input type="tel" name="phone" required className="w-full mt-1 p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="0812-3456-7890" />
         </div>
         <div>
            <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Password</label>

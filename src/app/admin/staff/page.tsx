@@ -1,15 +1,27 @@
 import { prisma } from "@/lib/prisma";
-import { Copyleft, UserPlus, MapPin, Activity } from "lucide-react";
-import { createFlexologist } from "@/app/actions/adminActions";
+import { Copyleft, UserPlus, MapPin, Activity, Clock } from "lucide-react";
+import { createFlexologist, toggleFlexologistDuty } from "@/app/actions/adminActions";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getTenant } from "@/lib/tenant";
 
 export default async function StaffManagement() {
+  const session = await getSession();
+  if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "OUTLET_MANAGER" && session.role !== "GLOBAL_MANAGER")) {
+    redirect("/login");
+  }
+  const tenant = await getTenant();
+
   const staff = await prisma.flexologist.findMany({
+    where: session.role === "OUTLET_MANAGER" 
+      ? { locationId: session.managedLocationId as string, tenantId: tenant?.id } 
+      : { tenantId: tenant?.id },
     include: { location: true },
     orderBy: { name: "asc" }
   });
 
   const locations = await prisma.location.findMany({
-    where: { isActive: true }
+    where: { isActive: true, tenantId: tenant?.id }
   });
 
   return (
@@ -42,14 +54,35 @@ export default async function StaffManagement() {
               
               <hr className="border-gray-200" />
               
+              <div className="grid grid-cols-2 gap-4">
+                 <div>
+                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Shift Start</label>
+                   <input type="time" name="shiftStart" defaultValue="09:00" className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" />
+                 </div>
+                 <div>
+                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Shift End</label>
+                   <input type="time" name="shiftEnd" defaultValue="20:00" className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" />
+                 </div>
+              </div>
+              
               <div>
                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Assigned Outlet</label>
-                 <select name="locationId" className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all text-sm">
-                    <option value="">None (Global)</option>
-                    {locations.map(loc => (
-                       <option key={loc.id} value={loc.id}>{loc.name}</option>
-                    ))}
-                 </select>
+                 {session.role === "SUPER_ADMIN" ? (
+                   <select name="locationId" className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all text-sm">
+                      <option value="">None (Global)</option>
+                      {locations.map(loc => (
+                         <option key={loc.id} value={loc.id}>{loc.name}</option>
+                      ))}
+                   </select>
+                 ) : (
+                   <input 
+                     type="text" 
+                     className="w-full mt-1 p-3 bg-gray-200 text-gray-500 border border-gray-200 rounded-xl outline-none font-bold" 
+                     readOnly 
+                     disabled
+                     value={locations.find(l => l.id === session.managedLocationId)?.name || "Your Outlet"} 
+                   />
+                 )}
               </div>
 
               <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors">
@@ -75,18 +108,32 @@ export default async function StaffManagement() {
                    <p className="text-sm text-gray-400">Use the form to create your staff registry.</p>
                 </div>
               ) : staff.map((member) => (
-                 <div key={member.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
+                 <div key={member.id} className={`bg-white p-5 rounded-2xl shadow-sm border flex flex-col justify-between ${member.isOnDuty ? 'border-gray-200' : 'border-gray-300 bg-gray-50/50 grayscale-[0.2]'}`}>
                     <div className="flex items-start gap-4 mb-4">
-                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                       <img src={member.imageUrl || ""} alt={member.name} className="w-16 h-16 rounded-full border border-gray-200 object-cover" />
-                       <div>
-                          <h4 className="font-bold text-lg text-gray-900 leading-tight mb-1">{member.name}</h4>
-                          <span className="inline-flex items-center gap-1.5 text-xs text-flx-teal font-semibold px-2 py-0.5 bg-flx-teal/10 rounded-full">
+                       <div className="w-16 h-16 shrink-0 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center font-bold text-gray-500 border border-gray-300 text-2xl uppercase shadow-inner">
+                          {member.name.charAt(0)}
+                       </div>
+                       <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                             <h4 className={`font-bold text-lg leading-tight mb-1 ${member.isOnDuty ? 'text-gray-900' : 'text-gray-500 line-through'}`}>{member.name}</h4>
+                             <form action={toggleFlexologistDuty}>
+                                <input type="hidden" name="flexId" value={member.id} />
+                                <input type="hidden" name="isOnDuty" value={member.isOnDuty ? "false" : "true"} />
+                                <button type="submit" className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full transition-all border ${member.isOnDuty ? 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200' : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'}`}>
+                                   {member.isOnDuty ? '🟢 On Duty' : '🔴 Off Duty'}
+                                </button>
+                             </form>
+                          </div>
+                          <span className="inline-flex items-center gap-1.5 text-xs text-flx-teal font-semibold px-2 py-0.5 bg-flx-teal/10 rounded-full mt-1 border border-flx-teal/20">
                             <Activity className="w-3 h-3" /> {member.bio}
                           </span>
                        </div>
                     </div>
-                    <div className="space-y-2 text-sm font-medium">
+                    <div className="space-y-2 text-sm font-medium border-t border-gray-100 pt-3 mt-1">
+                       <div className="flex justify-between items-center text-gray-600 mb-2">
+                          <p className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-gray-400" /> <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400">Shift</span></p>
+                          <p className="font-mono text-xs font-bold bg-white px-2 py-1 rounded border border-gray-200 text-gray-900">{member.shiftStart} - {member.shiftEnd}</p>
+                       </div>
                        {member.locationId ? (
                          <p className="flex items-center gap-2 text-gray-600"><MapPin className="w-4 h-4 text-gray-400" /> {member.location?.name}</p>
                        ) : (
@@ -95,6 +142,11 @@ export default async function StaffManagement() {
                        {member.canHomeService && (
                          <p className="flex items-center gap-2 text-blue-600"><Copyleft className="w-4 h-4" /> Dispatched for Home Service</p>
                        )}
+                       <div className="pt-2 mt-2 border-t border-gray-100 flex justify-end">
+                          <a href={`/therapist/${member.id}`} target="_blank" className="text-[10px] uppercase font-bold text-gray-400 hover:text-black transition-colors flex items-center gap-1">
+                             View Public Profile ↗
+                          </a>
+                       </div>
                     </div>
                  </div>
               ))}

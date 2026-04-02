@@ -32,5 +32,5 @@ export async function getSession() {
 
 export async function clearSession() {
   const cookieStore = await cookies();
-  cookieStore.delete("flex_session");
+  cookieStore.set("flex_session", "", { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
 }

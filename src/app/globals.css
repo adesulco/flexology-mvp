@@ -4,8 +4,8 @@
   --color-flx-dark: #FFFFFF;
   --color-flx-card: #FAFAFA;
   --color-flx-card-hover: #F4F4F5;
-  --color-flx-teal: #000000;
-  --color-flx-teal-muted: rgba(0, 0, 0, 0.05);
+  --color-flx-teal: var(--color-brand, #000000);  /* Dynamically inherits from Layout */
+  --color-flx-teal-muted: var(--color-brand-muted, rgba(0, 0, 0, 0.05));
   --color-flx-text: #18181B;
   --color-flx-text-muted: #71717A;
   --color-flx-border: #E4E4E7;

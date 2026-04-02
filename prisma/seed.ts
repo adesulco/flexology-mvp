@@ -35,20 +35,7 @@ async function main() {
     })
   }
 
-  // Seed Flexologists
-  for (const flex of MOCK_FLEXOLOGISTS) {
-    await prisma.flexologist.upsert({
-      where: { id: flex.id },
-      update: {},
-      create: {
-        id: flex.id,
-        name: flex.name,
-        rating: flex.rating,
-        bio: flex.specialty.join(", "),
-        imageUrl: flex.imageUrl,
-      },
-    })
-  }
+  // (Flexologists are no longer seeded. Admins will create them manually).
 
   console.log('✅ Seeding completed!')
 }

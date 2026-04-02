@@ -34,7 +34,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="w-full space-y-4">
         <div>
           <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Mobile Number</label>
-          <input type="tel" name="phone" required className="w-full mt-1 p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="0812-3456-7890" />
+          <input type="tel" name="phone" required autoComplete="tel" className="w-full mt-1 p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="0812-3456-7890" />
         </div>
         <div>
            <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Password</label>

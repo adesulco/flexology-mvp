@@ -17,12 +17,16 @@ export default async function ClientLayout({
   }
 
   return (
-    <div className="flex justify-center bg-gray-100 min-h-screen font-sans w-full">
-      <div className="w-full max-w-[480px] bg-white min-h-screen relative shadow-2xl flex flex-col border-x border-flx-border">
-        <main className="flex-1 pb-32">
+    <div className="flex justify-center bg-gray-100 h-[100dvh] font-sans w-full overflow-hidden">
+      <div className="w-full max-w-[480px] bg-white h-[100dvh] flex flex-col shadow-2xl border-x border-flx-border relative">
+        <main className="flex-1 overflow-y-auto w-full scroll-smooth scrollbar-hide relative pb-10">
           {children}
         </main>
-        {isActiveUser && <Navigation />}
+        {isActiveUser && (
+           <div className="w-full bg-white z-50 border-t border-flx-border relative top-0">
+             <Navigation />
+           </div>
+        )}
       </div>
     </div>
   );

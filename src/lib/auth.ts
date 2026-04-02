@@ -32,5 +32,12 @@ export async function getSession() {
 
 export async function clearSession() {
   const cookieStore = await cookies();
-  cookieStore.set("flex_session", "", { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
+  cookieStore.set("flex_session", "", { 
+     maxAge: 0, 
+     domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined,
+     path: "/",
+     httpOnly: true,
+     secure: process.env.NODE_ENV === "production",
+     sameSite: "lax" 
+  });
 }

@@ -93,7 +93,7 @@ export default function WalkInClient({ waitlist, flexologists, services }: any) 
                  Waiting room is empty.
               </div>
            ) : waitlist.map((w: any) => {
-              const service = services.find((s: any) => s.id === w.serviceId);
+              const service = services.find((s: any) => s.id === w.serviceRequested);
               const queueTimeMins = Math.floor((new Date().getTime() - new Date(w.checkInTime).getTime()) / 60000);
               
               return (

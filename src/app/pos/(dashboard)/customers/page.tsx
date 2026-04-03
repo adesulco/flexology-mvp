@@ -20,11 +20,14 @@ export default async function CustomersPage() {
            orderBy: { scheduledDate: 'desc' },
            take: 5,
            include: { service: true }
-        },
-        CustomerNote: {
-           orderBy: { createdAt: 'desc' }
         }
      },
+     orderBy: { createdAt: 'desc' }
+  });
+
+  const customerIds = customers.map(c => c.id);
+  const notes = await prisma.customerNote.findMany({
+     where: { customerId: { in: customerIds } },
      orderBy: { createdAt: 'desc' }
   });
 
@@ -36,10 +39,10 @@ export default async function CustomersPage() {
   const serializedCustomers = customers.map(c => ({
      ...c,
      createdAt: c.createdAt.toISOString(),
-     CustomerNote: c.CustomerNote?.map(n => ({
+     CustomerNote: notes.filter(n => n.customerId === c.id).map(n => ({
         ...n,
         createdAt: n.createdAt.toISOString(),
-        authorName: staffDict[n.authorId] || 'Unknown Admin'
+        authorName: staffDict[n.adminId] || 'Unknown Admin'
      })),
      lifteTimeValue: c.bookings.filter(b => b.status === "COMPLETED" || b.isPaid).reduce((acc, b) => acc + b.totalPrice, 0),
      bookings: c.bookings.map(b => ({

@@ -22,7 +22,7 @@ export async function addWalkIn(formData: FormData) {
          outletId,
          customerName,
          customerPhone,
-         serviceId: serviceId || null,
+         serviceRequested: serviceId || null,
          status: "waiting"
       }
    });
@@ -53,12 +53,12 @@ export async function assignWalkInToBooking(walkInId: string, flexologistId: str
       targetUserId = newU.id;
    }
 
-   const service = await prisma.service.findUnique({ where: { id: walkIn.serviceId! }});
+   const service = await prisma.service.findUnique({ where: { id: walkIn.serviceRequested! }});
 
    const booking = await prisma.booking.create({
       data: {
          userId: targetUserId,
-         serviceId: walkIn.serviceId!,
+         serviceId: walkIn.serviceRequested!,
          locationId: walkIn.outletId,
          flexologistId: flexologistId || null,
          mode: "OUTLET",
@@ -72,7 +72,7 @@ export async function assignWalkInToBooking(walkInId: string, flexologistId: str
 
    await prisma.walkInQueue.update({
       where: { id: walkInId },
-      data: { status: "assigned", assignedTo: flexologistId }
+      data: { status: "assigned", assignedStaffId: flexologistId }
    });
 
    revalidatePath("/pos/walk-ins");

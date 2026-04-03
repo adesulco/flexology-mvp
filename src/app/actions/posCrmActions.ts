@@ -10,8 +10,9 @@ export async function addCustomerNote(userId: string, content: string) {
 
    await prisma.customerNote.create({
       data: {
-         userId,
-         authorId: session.userId as string,
+         customerId: userId,
+         adminId: session.userId as string,
+         outletId: session.managedLocationId as string || "root",
          content
       }
    });

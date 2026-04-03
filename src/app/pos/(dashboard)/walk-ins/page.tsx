@@ -18,7 +18,7 @@ export default async function WalkInQueuePage() {
   const [waitlist, flexologists, services] = await Promise.all([
      prisma.walkInQueue.findMany({
         where: { outletId, status: "waiting" },
-        orderBy: { checkInTime: 'asc' }
+        orderBy: { createdAt: 'asc' }
      }),
      prisma.flexologist.findMany({
         where: { locationId: outletId, tenantId: tenant?.id, isOnDuty: true },
@@ -32,8 +32,7 @@ export default async function WalkInQueuePage() {
 
   const serializedWaitlist = waitlist.map(w => ({
      ...w,
-     checkInTime: w.checkInTime.toISOString(),
-     estimatedTime: w.estimatedTime?.toISOString() || null,
+     checkInTime: w.createdAt.toISOString(),
      createdAt: w.createdAt.toISOString(),
      updatedAt: w.updatedAt.toISOString(),
   }));

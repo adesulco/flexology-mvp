@@ -52,7 +52,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: { da
   const serializedTx = posTx.map(t => ({
      ...t,
      createdAt: t.createdAt.toISOString(),
-     updatedAt: t.updatedAt.toISOString(),
      booking: t.booking ? {
         ...t.booking,
         scheduledDate: t.booking.scheduledDate.toISOString()

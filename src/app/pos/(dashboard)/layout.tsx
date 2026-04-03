@@ -15,7 +15,7 @@ export default async function PosLayout({
 
   let locationName = "Global HQ";
   if (session.managedLocationId) {
-      const loc = await prisma.location.findUnique({ where: { id: session.managedLocationId } });
+      const loc = await prisma.location.findUnique({ where: { id: session.managedLocationId as string } });
       if (loc) locationName = loc.name;
   }
 
@@ -67,7 +67,7 @@ export default async function PosLayout({
          <div className="p-4 border-t border-white/10 shrink-0">
             <div className="bg-white/5 rounded-xl p-3 mb-4">
                <p className="text-xs font-bold text-gray-300">Active Admin:</p>
-               <p className="text-sm text-flx-teal font-medium truncate">{session.name}</p>
+               <p className="text-sm text-flx-teal font-medium truncate">{session.name as string}</p>
             </div>
             <form action={logout}>
                <button type="submit" className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-red-500/20 text-gray-400 hover:text-red-400 font-bold tracking-tight transition-all text-sm group">

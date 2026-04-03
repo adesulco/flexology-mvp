@@ -12,7 +12,7 @@ export default async function PosDashboard() {
   }
 
   // Filter scoped to Outlet Manager / Admin, bypass for Super Admin
-  const targetOutletId = session.role === "SUPER_ADMIN" ? undefined : session.managedLocationId;
+  const targetOutletId = session.role === "SUPER_ADMIN" ? undefined : (session.managedLocationId as string | undefined);
   const todayStart = startOfDay(new Date());
   const todayEnd = endOfDay(new Date());
 

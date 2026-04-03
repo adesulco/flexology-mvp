@@ -83,7 +83,7 @@ export default function NewBookingClient({ locations, services, flexologists, se
 
      try {
         const res = await createPosBooking(formData);
-        if (res.error) throw new Error(res.error);
+        if ((res as any).error) throw new Error((res as any).error);
         
         // Success
         router.push(`/pos/schedule`);

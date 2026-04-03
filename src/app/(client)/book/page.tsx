@@ -710,9 +710,10 @@ export default function BookingWizard() {
                     if (!response.ok) {
                        throw new Error("Booking failed");
                     }
+                    const data = await response.json();
                     
                     resetBooking();
-                    router.push('/');
+                    router.push(`/checkout/booking/${data.id}`);
                   } catch(e) {
                     console.error(e);
                     setIsSubmitting(false);

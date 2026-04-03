@@ -118,8 +118,8 @@ export default async function Bookings() {
                       </form>
                    )}
 
-                   {/* Mandatory Payment Button for Confirmed Sessions */}
-                   {b.status === "CONFIRMED" && !b.isPaid && (
+                   {/* Mandatory Payment Button for PENDING/CONFIRMED Sessions */}
+                   {(b.status === "CONFIRMED" || b.status === "PENDING") && !b.isPaid && (
                       <div className="mt-4 border-t border-flx-border/30 pt-4 flex justify-between items-center">
                          <span className="text-[10px] text-yellow-500 font-bold uppercase tracking-widest flex items-center gap-1.5 border border-yellow-500/20 px-2 py-1 rounded bg-yellow-500/10">Action Required</span>
                          <Link href={`/checkout/booking/${b.id}`}>

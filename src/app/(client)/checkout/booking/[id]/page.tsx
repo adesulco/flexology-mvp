@@ -24,7 +24,7 @@ export default async function BookingCheckout({ params }: { params: { id: string
   // Security Guard: Prevent Double Payment & Unconfirmed Payments
   if (!booking) redirect('/profile');
   if (booking.isPaid) redirect('/profile');
-  if (booking.status !== "CONFIRMED") redirect('/profile');
+  if (booking.status === "CANCELLED") redirect('/profile');
 
   // Load Admin Economy Configurations dynamically
   const systemConfigs = await prisma.systemSetting.findMany();

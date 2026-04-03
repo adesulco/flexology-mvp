@@ -88,7 +88,8 @@ export default async function BookingCheckout({ params }: { params: { id: string
             subtotal={booking.totalPrice} 
             itemId={booking.id} 
             type="BOOKING" 
-            fees={fees} 
+            fees={fees}
+            isAdmin={session.role === "OUTLET_MANAGER" || session.role === "OUTLET_ADMIN" || session.role === "SUPER_ADMIN"}
          />
       </div>
     </div>

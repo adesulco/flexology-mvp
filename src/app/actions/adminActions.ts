@@ -194,8 +194,9 @@ export async function createOutletManager(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const locationId = formData.get("locationId") as string;
+  const accessLevel = formData.get("accessLevel") as "OUTLET_MANAGER" | "OUTLET_ADMIN";
 
-  if (!name || !email || !password || !locationId) throw new Error("Missing required fields");
+  if (!name || !email || !password || !locationId || !accessLevel) throw new Error("Missing required fields");
 
   const exists = await prisma.user.findUnique({ where: { email } });
   if (exists) throw new Error("A user with this email already exists");
@@ -207,7 +208,7 @@ export async function createOutletManager(formData: FormData) {
       name,
       email,
       passwordHash,
-      role: "OUTLET_MANAGER",
+      role: accessLevel,
       managedLocationId: locationId
     }
   });

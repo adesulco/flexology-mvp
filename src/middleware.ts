@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('Content-Security-Policy', cspHeader)
 
   // Public paths that bypass auth checking (Guest Checkout enabled for /book)
-  if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.')) {
+  if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.') || path === '/pos/login') {
     // If we get a clear=true flag, forcibly strip the token
     if (request.nextUrl.searchParams.get('clear') === 'true') {
         const res = NextResponse.redirect(new URL('/login', request.url))
@@ -90,6 +90,13 @@ export async function middleware(request: NextRequest) {
            if (path.startsWith('/admin/staff') || path.startsWith('/admin/outlets') || path.startsWith('/admin/settings')) {
               return NextResponse.redirect(new URL('/admin', request.url))
            }
+        }
+      }
+      
+      // POS protection block
+      if (path.startsWith('/pos')) {
+        if (payload.role !== 'SUPER_ADMIN' && payload.role !== 'OUTLET_MANAGER' && payload.role !== 'OUTLET_ADMIN') {
+           return NextResponse.redirect(new URL('/pos/login', request.url)) // Bounce back
         }
       }
     } catch (e) {

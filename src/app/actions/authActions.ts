@@ -89,6 +89,10 @@ export async function login(formData: FormData) {
     return redirect("/admin");
   }
   
+  if (user.role === 'OUTLET_ADMIN') {
+    return redirect("/pos");
+  }
+  
   return redirect("/profile");
 }
 

@@ -116,6 +116,14 @@ export default async function OutletsManagement() {
                    </select>
                 </div>
 
+                <div>
+                   <label className="text-[10px] font-bold text-teal-800 uppercase tracking-wider">System Access Clearance</label>
+                   <select name="accessLevel" required className="w-full mt-1 p-3 bg-white border border-teal-200 rounded-xl focus:ring-1 focus:ring-flx-teal outline-none transition-all text-sm font-medium">
+                      <option value="OUTLET_MANAGER">Full Outlet Manager (Admin Panel + POS)</option>
+                      <option value="OUTLET_ADMIN">Local POS Terminal Operations Only</option>
+                   </select>
+                </div>
+
                 <div className="bg-white/50 p-3 rounded-lg border border-teal-200 text-xs text-teal-900 font-medium">
                    This user will instantly gain total administrative, booking, and staff-assignment control exclusively over their selected Base Station.
                 </div>

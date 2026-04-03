@@ -3,72 +3,74 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("POSTGRES_PRISMA_URL") // Uses connection pooling
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // Uses connection pooling
   directUrl = env("POSTGRES_URL_NON_POOLING") // Uses a direct connection
 }
 
 // SaaS Multi-Tenancy Core
 model Tenant {
-  id             String    @id @default(uuid())
-  slug           String    @unique // e.g., 'flex', 'sense'
-  name           String    // e.g., 'Flexology', 'Sense by Jari Jari'
-  primaryColor   String    @default("#0E7070") // e.g., '#0E7070' for teal
-  logoUrl        String?
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id           String   @id @default(uuid())
+  slug         String   @unique // e.g., 'flex', 'sense'
+  name         String // e.g., 'Flexology', 'Sense by Jari Jari'
+  primaryColor String   @default("#0E7070") // e.g., '#0E7070' for teal
+  logoUrl      String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  locations      Location[]
-  services       Service[]
-  flexologists   Flexologist[]
-  bookings       Booking[]
-  transactions   PaymentTransaction[]
+  locations           Location[]
+  services            Service[]
+  flexologists        Flexologist[]
+  bookings            Booking[]
+  paymentTransactions PaymentTransaction[]
+  posTransactions     PosTransaction[]
 }
 
 // User Profile & Authentication
 model User {
-  id            String    @id @default(uuid())
-  phoneNumber   String?   @unique
-  email         String?   @unique
-  name          String
-  passwordHash  String?   // Added for organic login
-  
+  id           String  @id @default(uuid())
+  phoneNumber  String? @unique
+  email        String? @unique
+  name         String
+  passwordHash String? // Added for organic login
+
   // Personal Info
-  age           Int?
-  gender        String?   // MALE, FEMALE, OTHER
-  
+  age    Int?
+  gender String? // MALE, FEMALE, OTHER
+
   // Preferences
-  prefGender    String?   // MALE, FEMALE, ANY
-  prefPressure  String?   // LIGHT, MEDIUM, FIRM
-  
+  prefGender   String? // MALE, FEMALE, ANY
+  prefPressure String? // LIGHT, MEDIUM, FIRM
+
   // Social Mechanics
-  referralCode  String?   @unique @default(uuid())
+  referralCode  String? @unique @default(uuid())
   referredById  String?
-  referredBy    User?     @relation("Referrals", fields: [referredById], references: [id])
-  referredUsers User[]    @relation("Referrals")
+  referredBy    User?   @relation("Referrals", fields: [referredById], references: [id])
+  referredUsers User[]  @relation("Referrals")
 
-  role          UserRole  @default(CLIENT)
-  points        Int       @default(0)
-  tier          TierRank  @default(FLEX)
-  
+  role   UserRole @default(CLIENT)
+  points Int      @default(0)
+  tier   TierRank @default(FLEX)
+
   // Gamification & Retention Mechanics
-  currentStreak Int       @default(0) // Tracks consecutive weeks (or months) with a booking
-  longestStreak Int       @default(0)
-  streakShields Int       @default(0) // Protects streak against missed months 
-  mysteryBoxes  Int       @default(0) // Unopened surprise lootboxes
-  badges        String[]  @default([]) // e.g., "First Booking", "Streaker", "Early Bird"
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  currentStreak Int      @default(0) // Tracks consecutive weeks (or months) with a booking
+  longestStreak Int      @default(0)
+  streakShields Int      @default(0) // Protects streak against missed months 
+  mysteryBoxes  Int      @default(0) // Unopened surprise lootboxes
+  badges        String[] @default([]) // e.g., "First Booking", "Streaker", "Early Bird"
 
-  bookings      Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
 
   // For Outlet Managers only
   managedLocationId String?
   managedLocation   Location? @relation("OutletManager", fields: [managedLocationId], references: [id])
-  
-  transactions      PaymentTransaction[]
+
+  transactions    PaymentTransaction[]
+  posTransactions PosTransaction[]
 }
 
 // Service Catalog
@@ -76,130 +78,201 @@ model Service {
   id          String   @id @default(uuid())
   name        String
   description String?
-  duration    Int      // in minutes
-  price       Int      // IDR pricing
+  duration    Int // in minutes
+  price       Int // IDR pricing
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  
-  tenantId    String?
-  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
-  
-  bookings    Booking[]
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  bookings Booking[]
 }
 
 // Physical Outlets/Locations
 model Location {
-  id          String   @id @default(uuid())
-  name        String
-  address     String
-  mapLink     String?
-  openTime    String   @default("08:00")
-  closeTime   String   @default("22:00")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  
-  tenantId    String?
-  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
-  
-  bookings    Booking[]
-  managers    User[]   @relation("OutletManager")
-  staff       Flexologist[] @relation("OutletStaff")
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  mapLink   String?
+  openTime  String   @default("08:00")
+  closeTime String   @default("22:00")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  bookings        Booking[]
+  managers        User[]           @relation("OutletManager")
+  staff           Flexologist[]    @relation("OutletStaff")
+  posTransactions PosTransaction[]
 }
 
 // Staff / Flexologists
 model Flexologist {
-  id              String   @id @default(uuid())
-  name            String
-  rating          Float    @default(5.0)
-  bio             String?
-  isActive        Boolean  @default(true)
-  imageUrl        String?
-  
-  shiftStart      String   @default("09:00")
-  shiftEnd        String   @default("20:00")
-  isOnDuty        Boolean  @default(true)
-  
-  canHomeService  Boolean  @default(false)
-  
-  locationId      String?
-  location        Location? @relation("OutletStaff", fields: [locationId], references: [id])
-  
-  tenantId        String?
-  tenant          Tenant?   @relation(fields: [tenantId], references: [id])
-  
-  bookings        Booking[]
+  id       String  @id @default(uuid())
+  name     String
+  rating   Float   @default(5.0)
+  bio      String?
+  isActive Boolean @default(true)
+  imageUrl String?
+
+  shiftStart String  @default("09:00")
+  shiftEnd   String  @default("20:00")
+  isOnDuty   Boolean @default(true)
+
+  canHomeService Boolean @default(false)
+
+  locationId String?
+  location   Location? @relation("OutletStaff", fields: [locationId], references: [id])
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  bookings Booking[]
 }
 
 // Core Booking Model
 model Booking {
-  id              String      @id @default(uuid())
-  mode            ServiceMode
-  status          BookingStatus @default(PENDING)
-  
+  id     String        @id @default(uuid())
+  mode   ServiceMode
+  status BookingStatus @default(PENDING)
+
   // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  
-  serviceId       String
-  service         Service     @relation(fields: [serviceId], references: [id])
-  
-  flexologistId   String?
-  flexologist     Flexologist? @relation(fields: [flexologistId], references: [id])
-  
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  flexologistId String?
+  flexologist   Flexologist? @relation(fields: [flexologistId], references: [id])
+
   // Outlet specific
-  locationId      String?
-  location        Location?    @relation(fields: [locationId], references: [id])
-  
+  locationId String?
+  location   Location? @relation(fields: [locationId], references: [id])
+
   // At-Home specific
-  homeAddress     String?
-  homeMapLink     String?
+  homeAddress String?
+  homeMapLink String?
 
   // Time & Cost
-  scheduledDate   DateTime
-  totalPrice      Int
+  scheduledDate DateTime
+  totalPrice    Int
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  pointsAwarded   Boolean     @default(false)
-  isPaid          Boolean     @default(false)
-  
-  tenantId        String?
-  tenant          Tenant?     @relation(fields: [tenantId], references: [id])
-  
+  source String @default("online") // e.g. "online", "pos"
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  pointsAwarded Boolean  @default(false)
+  isPaid        Boolean  @default(false)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
   // Phase 3: Temporary Hold Engine
-  expiresAt       DateTime?   // If PENDING and this time passes, the booking is automatically treated as voided.
+  expiresAt      DateTime? // If PENDING and this time passes, the booking is automatically treated as voided.
+  posTransaction PosTransaction?
 }
 
 // Track Payment Transactions natively
 model PaymentTransaction {
-  id              String    @id @default(uuid()) // Sent to Midtrans as Order ID
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  
-  subtotal        Int       // Action Cost
-  platformFee     Int       // Gateway specific surcharge
-  totalAmount     Int       // Gross Total sent to Midtrans
-  
-  method          String    // e.g., 'QRIS', 'VIRTUAL_ACCOUNT'
-  provider        String    @default("MIDTRANS")
-  type            PayType   
-  status          PayStatus @default(PENDING)
-  
-  bookingId       String?   @unique
-  targetTier      TierRank?
-  
-  tenantId        String?
-  tenant          Tenant?   @relation(fields: [tenantId], references: [id])
-  
-  createdAt       DateTime  @default(now())
-  paidAt          DateTime?
+  id     String @id @default(uuid()) // Sent to Midtrans as Order ID
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  subtotal    Int // Action Cost
+  platformFee Int // Gateway specific surcharge
+  totalAmount Int // Gross Total sent to Midtrans
+
+  method   String // e.g., 'QRIS', 'VIRTUAL_ACCOUNT'
+  provider String    @default("MIDTRANS")
+  type     PayType
+  status   PayStatus @default(PENDING)
+
+  bookingId  String?   @unique
+  targetTier TierRank?
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
 }
+
+// -----------------------------------------------------
+// POINT OF SALE (POS) ENGINE Additions
+// -----------------------------------------------------
+
+model PosTransaction {
+  id                    String   @id @default(uuid())
+  bookingId             String?  @unique
+  outletId              String
+  adminId               String
+  items                 Json     @default("[]")
+  subtotal              Int
+  discountAmount        Int      @default(0)
+  discountReason        String?
+  total                 Int
+  paymentMethod         String // cash, qris, card, bank_transfer, membership
+  paymentStatus         String   @default("pending") // pending, completed, failed, refunded
+  midtransTransactionId String?
+  notes                 String?
+  createdAt             DateTime @default(now())
+
+  // Relations
+  booking  Booking? @relation(fields: [bookingId], references: [id])
+  location Location @relation(fields: [outletId], references: [id])
+  admin    User     @relation(fields: [adminId], references: [id])
+  tenantId String?
+  tenant   Tenant?  @relation(fields: [tenantId], references: [id])
+}
+
+model WalkInQueue {
+  id                String   @id @default(uuid())
+  outletId          String
+  customerName      String
+  customerPhone     String?
+  customerId        String?
+  serviceRequested  String?
+  status            String   @default("waiting") // waiting, assigned, serving, completed, left
+  assignedStaffId   String?
+  assignedBookingId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CustomerNote {
+  id         String   @id @default(uuid())
+  customerId String
+  outletId   String
+  adminId    String
+  noteType   String   @default("general") // general, allergy, preference, treatment
+  content    String
+  createdAt  DateTime @default(now())
+}
+
+model CashDrawerSession {
+  id             String    @id @default(uuid())
+  outletId       String
+  adminId        String
+  openedAt       DateTime  @default(now())
+  closedAt       DateTime?
+  openingBalance Int
+  closingBalance Int?
+  notes          String?
+  status         String    @default("open") // open, closed
+}
+
+// -----------------------------------------------------
 
 // Enums
 enum UserRole {
   CLIENT
   FLEXOLOGIST
   OUTLET_MANAGER
+  OUTLET_ADMIN // Used specifically for Point-of-Sale (POS) terminal access
   GLOBAL_MANAGER
   SUPER_ADMIN // Technically Tenant Admin now
   PLATFORM_OWNER // For Jemari SaaS root operations
@@ -238,8 +311,8 @@ enum PayStatus {
 // Global System Configuration overrides
 model SystemSetting {
   id        String   @id @default(uuid())
-  key       String   @unique  // e.g., 'REGISTRATION_BONUS'
-  value     String            // e.g., '10000'
+  key       String   @unique // e.g., 'REGISTRATION_BONUS'
+  value     String // e.g., '10000'
   updatedAt DateTime @updatedAt
 }
 

@@ -109,12 +109,16 @@ export default function BookingWizard() {
   }, [usePoints, selectedService, dbPoints, maxPointsAllowed]);
 
   const handleNext = () => {
-    if (step < 5) setStep(step + 1);
+    if (step < 5) {
+       setStep(step + 1);
+       if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   };
 
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
+      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
       router.push("/");
     }
@@ -125,7 +129,14 @@ export default function BookingWizard() {
     if (step === 1 && mode === 'home' && !homeAddress) return true;
     if (step === 2 && !selectedService) return true;
     if (step === 3 && (!selectedDate || !selectedTime)) return true;
-    if (step === 4 && !selectedFlexologist) return true;
+    
+    // Prevent booking without therapist (FLX-005 / FLX-015)
+    if (step === 4) {
+       if (!selectedFlexologist || selectedFlexologist.id === '') return true;
+       // If no therapists are available, they cannot bypass by having "any" cached
+       if (selectedFlexologist.id === 'any' && availableFlexologists.length === 0) return true;
+    }
+    
     if (step === 5 && usePoints && pointsToUse > maxPointsAllowed) return true;
     return false;
   };
@@ -376,9 +387,8 @@ export default function BookingWizard() {
             </div>
 
             <div className="mb-2">
-              <h3 className="text-sm font-medium mb-3 text-flx-text flex justify-between items-center">
+              <h3 className="font-bold text-sm text-flx-text mb-3 flex items-center justify-between">
                  <span>Time Slots</span>
-                 <span className="text-[10px] font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded flex items-center gap-1 animate-pulse"><Flame className="w-3 h-3" /> 24 people looking</span>
               </h3>
               <div className="grid grid-cols-3 gap-3">
                 {timeSlots.map(slot => (
@@ -407,26 +417,28 @@ export default function BookingWizard() {
             <p className="text-flx-text-muted text-sm mb-6">Choose an expert for your session.</p>
             
             <div className="flex flex-col gap-4">
-              <div 
-                  onClick={() => setFlexologist({ id: "any", name: "Any Available", rating: 4.9, reviews: 0, specialty: [], imageUrl: "" })}
-                  className={`p-4 rounded-2xl border flex items-center gap-4 cursor-pointer transition-colors ${
-                    selectedFlexologist?.id === "any" ? 'border-flx-teal bg-flx-teal/5' : 'border-flx-border bg-white'
-                  }`}
-                >
-                  <div className="w-12 h-12 rounded-full bg-flx-card border border-dashed border-flx-border flex items-center justify-center text-flx-text-muted">
-                    <User className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg text-flx-text">First Available</h3>
-                    <p className="text-xs text-flx-text-muted">Match with the quickest expert</p>
-                  </div>
-              </div>
-
               {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading staff...</p>}
               {!isLoading && availableFlexologists.length === 0 && (
                  <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm">
                     No therapists are currently On-Duty for your configured <b>{selectedTime}</b> session block. Please select a different time or outlet.
                  </div>
+              )}
+              
+              {!isLoading && availableFlexologists.length > 0 && (
+                  <div 
+                      onClick={() => setFlexologist({ id: "any", name: "Any Available", rating: 4.9, reviews: 0, specialty: [], imageUrl: "" })}
+                      className={`p-4 rounded-2xl border flex items-center gap-4 cursor-pointer transition-colors ${
+                        selectedFlexologist?.id === "any" ? 'border-flx-teal bg-flx-teal/5' : 'border-flx-border bg-white hover:border-flx-teal/50'
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-flx-card border border-dashed border-flx-border flex items-center justify-center text-flx-text-muted">
+                        <User className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg text-flx-text">First Available</h3>
+                        <p className="text-xs text-flx-text-muted">Match with the quickest expert</p>
+                      </div>
+                  </div>
               )}
               {availableFlexologists.map(flex => (
                 <div 
@@ -473,7 +485,7 @@ export default function BookingWizard() {
                   <p className="font-semibold text-base text-flx-text">{selectedService?.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">IDR {(basePrice / 1000).toFixed(0)}K</p>
+                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">Rp {basePrice.toLocaleString('id-ID')}</p>
                   <p className="text-[10px] bg-flx-card border border-flx-border px-2 py-0.5 rounded-md inline-block text-flx-text">{selectedService?.duration} min</p>
                 </div>
               </div>
@@ -622,10 +634,10 @@ export default function BookingWizard() {
                <span className="font-bold text-white">Total Due</span>
                <div className="flex flex-col items-end">
                   {usePoints && pointsToUse > 0 && selectedService && (
-                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">IDR {priceAfterTierAndAI.toLocaleString()}</span>
+                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">Rp {priceAfterTierAndAI.toLocaleString('id-ID')}</span>
                   )}
                   <span className="text-xl font-mono text-white font-bold">
-                     IDR {selectedService ? (priceAfterTierAndAI - (usePoints ? pointsToUse : 0)).toLocaleString() : 0}
+                     Rp {selectedService ? (priceAfterTierAndAI - (usePoints ? pointsToUse : 0)).toLocaleString('id-ID') : 0}
                   </span>
                </div>
             </div>
@@ -652,8 +664,8 @@ export default function BookingWizard() {
         <div className="w-10"></div> {/* Spacer to center dots */}
       </header>
 
-      {/* Main Checkout Area */}
-      <main className="flex-1 overflow-y-auto px-6 py-4 pb-32 scrollbar-hide">
+      {/* Main Checkout Area (FLX-008 Safe Area Fix) */}
+      <main className="flex-1 overflow-y-auto px-6 py-4 pb-[140px] scrollbar-hide">
          <AnimatePresence mode="wait">
             {renderStepContent()}
          </AnimatePresence>

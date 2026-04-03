@@ -29,6 +29,21 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-tenant-slug', tenantSlug);
 
+  // Content Security Policy (FLX-002)
+  const nonce = btoa(String.fromCharCode(...new Uint8Array(crypto.getRandomValues(new Uint8Array(16)))));
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https:;
+    font-src 'self' data:;
+    connect-src 'self';
+    frame-ancestors 'none';
+  `.replace(/\s{2,}/g, ' ').trim()
+
+  requestHeaders.set('x-nonce', nonce)
+  requestHeaders.set('Content-Security-Policy', cspHeader)
+
   // Public paths that bypass auth checking (Guest Checkout enabled for /book)
   if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.')) {
     // If we get a clear=true flag, forcibly strip the token
@@ -51,9 +66,9 @@ export async function middleware(request: NextRequest) {
           return res
        }
     }
-    return NextResponse.next({
-       request: { headers: requestHeaders }
-    });
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    response.headers.set('Content-Security-Policy', cspHeader);
+    return response;
   }
 
   // If trying to access protected paths without token
@@ -85,9 +100,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next({
-     request: { headers: requestHeaders }
-  });
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('Content-Security-Policy', cspHeader);
+  return response;
 }
 
 export const config = {

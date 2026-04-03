@@ -33,9 +33,9 @@ export default async function SettingsPage() {
          <div className="p-5 space-y-6">
             <form action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">New User Registration Bonus (FLX)</label>
+                  <label htmlFor="regBonus" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">New User Registration Bonus (FLX)</label>
                   <input type="hidden" name="key" value="REGISTRATION_BONUS" />
-                  <input type="number" name="value" defaultValue={regBonus} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
+                  <input id="regBonus" type="number" name="value" defaultValue={regBonus} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
@@ -47,9 +47,9 @@ export default async function SettingsPage() {
 
             <form action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">QRIS / E-Wallet Fee (IDR)</label>
+                  <label htmlFor="feeQris" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">QRIS / E-Wallet Fee (IDR)</label>
                   <input type="hidden" name="key" value="FEE_QRIS" />
-                  <input type="number" name="value" defaultValue={feeQris} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
+                  <input id="feeQris" type="number" name="value" defaultValue={feeQris} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
@@ -57,9 +57,9 @@ export default async function SettingsPage() {
             </form>
             <form action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Virtual Account Surcharge (IDR Flat)</label>
+                  <label htmlFor="feeVa" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Virtual Account Surcharge (IDR Flat)</label>
                   <input type="hidden" name="key" value="FEE_VA" />
-                  <input type="number" name="value" defaultValue={feeVa} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
+                  <input id="feeVa" type="number" name="value" defaultValue={feeVa} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
@@ -67,9 +67,9 @@ export default async function SettingsPage() {
             </form>
             <form action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Credit Card Rate % (e.g. 0.029 for 2.9%)</label>
+                  <label htmlFor="feeCc" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Credit Card Rate % (e.g. 0.029 for 2.9%)</label>
                   <input type="hidden" name="key" value="FEE_CC" />
-                  <input type="number" step="0.001" name="value" defaultValue={feeCc} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
+                  <input id="feeCc" type="number" step="0.001" name="value" defaultValue={feeCc} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
@@ -94,29 +94,29 @@ export default async function SettingsPage() {
                    
                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Display Name</label>
-                         <input name="name" defaultValue={tier.name} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-bold" required />
+                         <label htmlFor={`name-${tier.id}`} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Display Name</label>
+                         <input id={`name-${tier.id}`} name="name" defaultValue={tier.name} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-bold" required />
                       </div>
                       <div>
-                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Monthly Price (IDR)</label>
-                         <input type="number" name="price" defaultValue={tier.price} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
+                         <label htmlFor={`price-${tier.id}`} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Monthly Price (IDR)</label>
+                         <input id={`price-${tier.id}`} type="number" name="price" defaultValue={tier.price} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
                       </div>
                    </div>
 
                    <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Discount Yield (%)</label>
-                         <input type="number" name="discountPercent" defaultValue={tier.discountPercent} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
+                         <label htmlFor={`discount-${tier.id}`} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Discount Yield (%)</label>
+                         <input id={`discount-${tier.id}`} type="number" name="discountPercent" defaultValue={tier.discountPercent} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
                       </div>
                       <div>
-                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Point Multiplier (e.g. 1.5)</label>
-                         <input type="number" step="0.1" name="pointMultiplier" defaultValue={tier.pointMultiplier} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
+                         <label htmlFor={`multiplier-${tier.id}`} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Point Multiplier (e.g. 1.5)</label>
+                         <input id={`multiplier-${tier.id}`} type="number" step="0.1" name="pointMultiplier" defaultValue={tier.pointMultiplier} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" required />
                       </div>
                    </div>
 
                    <div className="mb-4">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Benefits <span className="lowercase font-normal tracking-normal">(Separate each bullet point by returning a new line)</span></label>
-                      <textarea name="benefits" defaultValue={tier.benefits.join('\n')} rows={tier.benefits.length + 1 || 3} className="w-full p-3 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm text-gray-600 leading-relaxed" required />
+                      <label htmlFor={`benefits-${tier.id}`} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Benefits <span className="lowercase font-normal tracking-normal">(Separate each bullet point by returning a new line)</span></label>
+                      <textarea id={`benefits-${tier.id}`} name="benefits" defaultValue={tier.benefits.join('\n')} rows={tier.benefits.length + 1 || 3} className="w-full p-3 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm text-gray-600 leading-relaxed" required />
                    </div>
 
                    <button type="submit" className="w-full py-3 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all flex items-center justify-center">

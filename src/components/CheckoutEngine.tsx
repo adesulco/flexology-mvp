@@ -177,7 +177,7 @@ export default function CheckoutEngine({
                   </div>
                </div>
                <div className="text-right">
-                  <span className="text-xs font-bold text-gray-500">IDR {(fees.va / 1000).toFixed(0)}K Fee</span>
+                  <span className="text-xs font-bold text-gray-500">Rp {fees.va.toLocaleString('id-ID')} Fee</span>
                </div>
             </button>
 
@@ -212,11 +212,11 @@ export default function CheckoutEngine({
             <div className="space-y-1 mb-4 flex flex-col items-end">
                <div className="flex justify-between items-center w-full px-2">
                   <span className="text-xs font-bold text-gray-400">Merchant Surcharge</span>
-                  <span className="text-sm font-bold font-mono text-gray-500">+ IDR {(platformFee / 1000).toFixed(1)}K</span>
+                  <span className="text-sm font-bold font-mono text-gray-500">+ Rp {platformFee.toLocaleString('id-ID')}</span>
                </div>
                <div className="flex justify-between items-center w-full px-2">
                   <span className="text-lg font-bold text-black">Total to Deduct</span>
-                  <span className="text-2xl font-bold font-mono text-black">IDR {(totalAmount / 1000).toFixed(1)}K</span>
+                  <span className="text-2xl font-bold font-mono text-black">Rp {totalAmount.toLocaleString('id-ID')}</span>
                </div>
             </div>
 

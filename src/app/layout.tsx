@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
      };
   }
 
-  const title = `${tenant.name || "Flex"} | Mobile Booking System`;
+  const title = `${tenant.name || "Flex"} | Premium & Wellness Recovery`;
   const description = `Book assisted stretching and premium services at ${tenant.name || "Flex"}.`;
   
   return {
@@ -79,7 +79,7 @@ export default async function RootLayout({
   
   return (
     <html
-      lang="en"
+      lang="id"
       className={`${inter.variable} h-full antialiased bg-gray-100`}
       style={{ 
          "--color-brand": tenant ? (tenant.primaryColor || "#000000") : "#2563EB",

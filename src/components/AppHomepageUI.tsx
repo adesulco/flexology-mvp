@@ -177,7 +177,7 @@ export function AppHomepageUI({ user, lastBooking, tenant }: { user?: any, lastB
         )}
 
         {/* Quick Actions / Modes */}
-        <section className="mb-8">
+        <section className="mb-2">
           <motion.h2 variants={itemVariants} className="text-xl tracking-tight font-semibold text-flx-text mb-4">
             How would you like to recover?
           </motion.h2>

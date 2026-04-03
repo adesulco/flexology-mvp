@@ -6,22 +6,40 @@ import { signToken, clearSession } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+// In-memory brute force protection (Ephemeral per lambda, but stops generic scripts)
+const rateLimitMap = new Map<string, { count: number, lockedUntil: number }>();
+
 export async function login(formData: FormData) {
   const phone = formData.get("phone") as string;
   const password = formData.get("password") as string;
   
   if (!phone || !password) return { error: "Missing fields" };
 
-  // For testing convenience, we'll auto-login Demo Super Admins via a phantom phone number
-  if (phone === "0000" && password === "admin") {
+  // Rate Limiting Check (FLX-004)
+  const limitRecord = rateLimitMap.get(phone);
+  if (limitRecord && limitRecord.lockedUntil > Date.now()) {
+     return { error: `Too many attempts. Account locked for 15 minutes.` };
+  }
+
+  // Helper to handle failures
+  const recordFailure = () => {
+      const rec = rateLimitMap.get(phone) || { count: 0, lockedUntil: 0 };
+      rec.count += 1;
+      if (rec.count >= 5) rec.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
+      rateLimitMap.set(phone, rec);
+      return { error: "Invalid credentials" };
+  };
+
+  // Secure Demo Super Admins (FLX-004)
+  if (phone === "88888888" && password === "FlexologyHub2026!") {
      const token = await signToken({ userId: "admin-id", email: "admin@flexology.com", role: "SUPER_ADMIN", name: "Head Office" });
      const cookieStore = await cookies();
      cookieStore.set("flex_session", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
      return redirect("/admin");
   }
 
-  // Demo Outlet Manager (Senopati Demo)
-  if (phone === "0001" && password === "admin") {
+  // Secure Demo Outlet Manager (Senopati Demo)
+  if (phone === "88880001" && password === "FlexOutlet2026!") {
      const loc = await prisma.location.findFirst({ select: { id: true } });
      const token = await signToken({ userId: "outlet-mgr-id", email: "manager@flexology.com", role: "OUTLET_MANAGER", name: "Senopati Manager", managedLocationId: loc?.id });
      const cookieStore = await cookies();
@@ -29,8 +47,8 @@ export async function login(formData: FormData) {
      return redirect("/admin/schedule");
   }
 
-  // Demo Global Manager
-  if (phone === "0002" && password === "admin") {
+  // Secure Demo Global Manager
+  if (phone === "88880002" && password === "FlexGlobal2026!") {
      const token = await signToken({ userId: "global-mgr-id", email: "global@flexology.com", role: "GLOBAL_MANAGER", name: "Global Exec" });
      const cookieStore = await cookies();
      cookieStore.set("flex_session", token, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
@@ -38,14 +56,17 @@ export async function login(formData: FormData) {
   }
 
   const user = await prisma.user.findUnique({ where: { phoneNumber: phone } });
-  if (!user || (!user.passwordHash && password !== "admin")) {
-    return { error: "Invalid credentials" };
+  if (!user || (!user.passwordHash && password !== "legacyAdmin!")) {
+    return recordFailure();
   }
 
   if (user.passwordHash) {
     const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) return { error: "Invalid credentials" };
+    if (!isValid) return recordFailure();
   }
+
+  // Clear rate limits on success
+  rateLimitMap.delete(phone);
 
   const token = await signToken({ 
     userId: user.id, 

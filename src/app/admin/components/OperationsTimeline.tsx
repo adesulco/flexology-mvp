@@ -231,11 +231,12 @@ export default function OperationsTimeline({
                          <p className="text-[10px] text-gray-500 uppercase font-mono tracking-widest">{col.subtitle}</p>
                       </div>
                    ))}
-                   {gridColumns.length === 0 && (
-                      <div className="flex-1 p-3 text-center flex items-center justify-center text-xs text-gray-400 font-medium italic bg-gray-50/50">
-                         No grid columns available.
-                      </div>
-                   )}
+                    {gridColumns.length === 0 && (
+                       <div className="flex-1 p-3 text-center flex flex-col items-center justify-center text-xs text-gray-400 font-medium bg-gray-50/50">
+                          <Activity className="w-5 h-5 mb-2 text-gray-300" />
+                          No operational therapists assigned to this outlet.<br/>Please add or assign staff to view the timeline mapping.
+                       </div>
+                    )}
                 </div>
              </div>
 

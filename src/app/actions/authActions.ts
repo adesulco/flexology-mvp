@@ -25,7 +25,13 @@ export async function login(formData: FormData) {
   const recordFailure = () => {
       const rec = rateLimitMap.get(phone) || { count: 0, lockedUntil: 0 };
       rec.count += 1;
-      if (rec.count >= 5) rec.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
+      
+      if (rec.count >= 10) {
+          rec.lockedUntil = Date.now() + 24 * 60 * 60 * 1000; // 24 hours lock
+      } else if (rec.count >= 5) {
+          rec.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
+      }
+      
       rateLimitMap.set(phone, rec);
       return { error: "Invalid credentials" };
   };
@@ -56,7 +62,7 @@ export async function login(formData: FormData) {
   }
 
   const user = await prisma.user.findUnique({ where: { phoneNumber: phone } });
-  if (!user || (!user.passwordHash && password !== "legacyAdmin!")) {
+  if (!user || (!user.passwordHash)) {
     return recordFailure();
   }
 

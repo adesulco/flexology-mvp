@@ -3,6 +3,7 @@
 import { motion, Variants } from "framer-motion";
 import { Copyleft, ArrowRight, Activity, MapPin, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
 
@@ -42,7 +43,7 @@ export function LandingPageUI({ services = [], tenant }: { services?: any[], ten
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
             className="w-24 h-24 bg-white rounded-3xl flex items-center justify-center mb-10 shadow-[0_0_40px_rgba(255,255,255,0.1)] border border-white/10"
          >
-            <img src="/logo.png" alt="Flex Logo" className="w-[80%] h-auto object-contain" />
+            <Image src="/logo.png" alt="Flex Logo" width={80} height={80} className="w-[80%] h-auto object-contain" priority />
          </motion.div>
 
          <motion.div

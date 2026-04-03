@@ -28,6 +28,7 @@ export interface Flexologist {
   reviews: number;
   specialty: string[];
   imageUrl: string;
+  locationId?: string;
   isOnDuty?: boolean;
   shiftStart?: string;
   shiftEnd?: string;

@@ -49,6 +49,8 @@ export default function BookingWizard() {
   const [guestPhone, setGuestPhone] = useState("");
 
   useEffect(() => {
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+    
     Promise.all([
       fetch('/api/locations').then(res => res.json()),
       fetch('/api/services').then(res => res.json()),
@@ -266,7 +268,9 @@ export default function BookingWizard() {
                 <p className="text-flx-text-muted text-sm mb-6">Where would you like to recover today?</p>
                 <div className="flex flex-col gap-4">
                   {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading outlets...</p>}
-                  {locations.map(loc => (
+                  {locations
+                     .filter(loc => flexologists.some(f => f.locationId === loc.id))
+                     .map(loc => (
                     <div 
                       key={loc.id} 
                       onClick={() => setLocation(loc)}

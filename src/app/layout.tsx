@@ -88,6 +88,7 @@ export default async function RootLayout({
     >
       <body className="h-full w-full bg-gray-100 antialiased overflow-x-hidden">
         {children}
+        <Navigation />
         <Script src={process.env.NODE_ENV === "production" ? "https://app.midtrans.com/snap/snap.js" : "https://app.sandbox.midtrans.com/snap/snap.js"} strategy="beforeInteractive" data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY} />
         <Script id="register-sw" strategy="afterInteractive">
           {`

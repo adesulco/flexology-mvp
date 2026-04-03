@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { updateSystemSetting, updateMembershipTier } from "@/app/actions/settingActions";
 import { CheckCircle2, Crown, Zap } from "lucide-react";
+import { ConfirmForm } from "./ConfirmForm";
 
 export default async function SettingsPage() {
   const session = await getSession();
@@ -31,7 +32,7 @@ export default async function SettingsPage() {
             <h3 className="font-bold text-sm text-black">Economy Engine</h3>
          </div>
          <div className="p-5 space-y-6">
-            <form action={updateSystemSetting} className="flex gap-4 items-end">
+            <ConfirmForm action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
                   <label htmlFor="regBonus" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">New User Registration Bonus (FLX)</label>
                   <input type="hidden" name="key" value="REGISTRATION_BONUS" />
@@ -40,12 +41,12 @@ export default async function SettingsPage() {
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
                </button>
-            </form>
+            </ConfirmForm>
             
             <hr className="border-gray-100" />
             <h4 className="text-[10px] font-bold text-black uppercase tracking-widest mb-2 pl-1">Payment Gateway Platform Processing Fees</h4>
 
-            <form action={updateSystemSetting} className="flex gap-4 items-end">
+            <ConfirmForm action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
                   <label htmlFor="feeQris" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">QRIS / E-Wallet Fee (IDR)</label>
                   <input type="hidden" name="key" value="FEE_QRIS" />
@@ -54,8 +55,8 @@ export default async function SettingsPage() {
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
                </button>
-            </form>
-            <form action={updateSystemSetting} className="flex gap-4 items-end">
+            </ConfirmForm>
+            <ConfirmForm action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
                   <label htmlFor="feeVa" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Virtual Account Surcharge (IDR Flat)</label>
                   <input type="hidden" name="key" value="FEE_VA" />
@@ -64,17 +65,17 @@ export default async function SettingsPage() {
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
                </button>
-            </form>
-            <form action={updateSystemSetting} className="flex gap-4 items-end">
+            </ConfirmForm>
+            <ConfirmForm action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
                   <label htmlFor="feeCc" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Credit Card Rate % (e.g. 0.029 for 2.9%)</label>
                   <input type="hidden" name="key" value="FEE_CC" />
-                  <input id="feeCc" type="number" step="0.001" name="value" defaultValue={feeCc} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
+                  <input id="feeCc" type="text" pattern="^\d+(\.\d{1,3})?$" name="value" defaultValue={feeCc} placeholder="0.029" className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save
                </button>
-            </form>
+            </ConfirmForm>
          </div>
       </section>
 
@@ -85,7 +86,7 @@ export default async function SettingsPage() {
          </div>
          <div className="p-5 space-y-8">
             {tiers.map((tier) => (
-               <form action={updateMembershipTier} key={tier.id} className="relative p-5 rounded-xl border border-gray-200 bg-gray-50/50">
+               <ConfirmForm action={updateMembershipTier} key={tier.id} className="relative p-5 rounded-xl border border-gray-200 bg-gray-50/50">
                    <div className="absolute top-0 right-5 transform -translate-y-1/2 bg-white text-gray-500 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border shadow-sm">
                      {tier.rank} Target
                    </div>
@@ -122,7 +123,7 @@ export default async function SettingsPage() {
                    <button type="submit" className="w-full py-3 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all flex items-center justify-center">
                       Commit Interface Changes
                    </button>
-               </form>
+               </ConfirmForm>
             ))}
          </div>
       </section>

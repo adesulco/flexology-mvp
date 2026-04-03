@@ -19,6 +19,7 @@ export async function updateSystemSetting(formData: FormData) {
      create: { key, value }
   });
 
+  console.info(`[AUDIT LOG] ${session.email} updated System Setting <${key}> to ${value}`);
   revalidatePath("/admin/settings");
   revalidatePath("/register");
 }
@@ -50,6 +51,7 @@ export async function updateMembershipTier(formData: FormData) {
      }
   });
 
+  console.info(`[AUDIT LOG] ${session.email} updated Membership Tier ${name} (${tierId})`);
   revalidatePath("/admin/settings");
   revalidatePath("/rewards");
   revalidatePath("/subscribe");

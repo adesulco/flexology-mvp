@@ -13,7 +13,8 @@ export async function createFlexologist(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const name = formData.get("name") as string
+  const rawName = formData.get("name") as string
+  const name = rawName.trim().replace(/\b\w/g, c => c.toUpperCase())
   const specialty = formData.get("specialty") as string
   let locationId = formData.get("locationId") as string
   const canHomeService = formData.get("canHomeService") === "on"
@@ -43,6 +44,7 @@ export async function createFlexologist(formData: FormData) {
     }
   })
 
+  console.info(`[AUDIT LOG] ${session.email} created Flexologist <${name}> for Outlet: ${locationId || 'Global'}`);
   revalidatePath("/admin/staff")
 }
 
@@ -57,6 +59,7 @@ export async function toggleFlexologistDuty(formData: FormData) {
       where: { id: flexId },
       data: { isOnDuty }
    });
+   console.info(`[AUDIT LOG] ${session.email} toggled Flexologist ${flexId} duty state to: ${isOnDuty}`);
    revalidatePath("/admin/staff");
 }
 

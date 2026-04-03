@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Activity, DollarSign, Users, Target } from "lucide-react";
 import { getTenant } from "@/lib/tenant";
+import { formatCurrency } from "@/lib/formatters";
 
 export const dynamic = "force-dynamic";
 
@@ -14,14 +15,7 @@ export default async function ExecutiveDashboard() {
 
   const tenant = await getTenant();
 
-  // 1. Fetch Gross Revenue from PaymentTransactions
-  const payments = await prisma.paymentTransaction.findMany({
-     where: { status: 'SUCCESS', tenantId: tenant?.id }
-  });
-  
-  const totalRevenue = payments.reduce((acc: number, curr: any) => acc + (curr.totalAmount || 0), 0);
-
-  // 2. Fetch Aggregated Bookings
+  // 1. Fetch Aggregated Bookings First
   const bookings = await prisma.booking.findMany({
      where: { tenantId: tenant?.id },
      include: {
@@ -31,8 +25,13 @@ export default async function ExecutiveDashboard() {
   });
 
   const totalBookings = bookings.length;
-  const confirmedBookings = bookings.filter(b => b.status === "CONFIRMED").length;
+  const confirmedBookings = bookings.filter(b => b.status === "CONFIRMED" || b.status === "COMPLETED").length;
   const voidedBookings = bookings.filter(b => b.status === "CANCELLED").length;
+
+  // 2. Calculate Gross Revenue from the EXACT same dataset as Leaderboard
+  const totalRevenue = bookings
+     .filter(b => b.status !== "CANCELLED")
+     .reduce((acc: number, curr: any) => acc + (curr.totalPrice || 0), 0);
 
   // 3. Outlet Leaderboard Math
   const outletMap: Record<string, { name: string, volume: number, count: number }> = {};
@@ -66,7 +65,7 @@ export default async function ExecutiveDashboard() {
              </div>
              <div>
                <p className="text-gray-500 font-bold mb-1">Gross Settled Revenue</p>
-               <h3 className="text-3xl font-black text-gray-900">Rp {totalRevenue.toLocaleString()}</h3>
+               <h3 className="text-3xl font-black text-gray-900">{formatCurrency(totalRevenue)}</h3>
              </div>
           </div>
 
@@ -121,7 +120,7 @@ export default async function ExecutiveDashboard() {
                      <td className="px-6 py-4 font-black text-gray-400">#{index + 1}</td>
                      <td className="px-6 py-4 font-bold text-gray-900">{l.name}</td>
                      <td className="px-6 py-4 font-medium text-gray-600">{l.count}</td>
-                     <td className="px-6 py-4 font-bold text-green-600">Rp {l.volume.toLocaleString()}</td>
+                     <td className="px-6 py-4 font-bold text-green-600">{formatCurrency(l.volume)}</td>
                   </tr>
                ))}
              </tbody>

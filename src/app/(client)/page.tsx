@@ -1,7 +1,8 @@
 import { getSession } from "@/lib/auth";
-import { LandingPageUI } from "@/components/LandingPageUI";
-import { AppHomepageUI } from "@/components/AppHomepageUI";
-import { MarketplaceHomepageUI } from "@/components/MarketplaceHomepageUI";
+import dynamic from 'next/dynamic';
+const LandingPageUI = dynamic(() => import('@/components/LandingPageUI').then(mod => mod.LandingPageUI), { ssr: true });
+const AppHomepageUI = dynamic(() => import('@/components/AppHomepageUI').then(mod => mod.AppHomepageUI), { ssr: true });
+const MarketplaceHomepageUI = dynamic(() => import('@/components/MarketplaceHomepageUI').then(mod => mod.MarketplaceHomepageUI), { ssr: true });
 import { prisma } from "@/lib/prisma";
 import { getTenant } from "@/lib/tenant";
 

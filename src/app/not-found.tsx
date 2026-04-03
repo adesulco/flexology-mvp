@@ -1,38 +1,21 @@
-"use client"
-
 import Link from "next/link";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Activity } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-[100dvh] bg-gray-50 flex items-center justify-center p-6 text-center">
-      <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 max-w-sm w-full relative overflow-hidden">
-         {/* Top Color Bar matching Tenant */}
-         <div className="absolute top-0 left-0 right-0 h-2 bg-[var(--color-brand)]"></div>
-         
-         <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-6">
-            <AlertCircle className="w-10 h-10 text-gray-400" />
-         </div>
-         
-         <h1 className="text-3xl font-black text-gray-900 mb-2">Not Found.</h1>
-         <p className="text-gray-500 mb-8 leading-relaxed">
-            The wellness therapy or page you are looking for has been removed or does not exist on this sub-domain.
-         </p>
-         
-         <Link 
-            href="/" 
-            className="flex items-center justify-center gap-2 w-full py-4 text-white font-bold rounded-xl active:scale-95 transition-transform"
-            style={{ backgroundColor: 'var(--color-brand)' }}
-         >
-            <ArrowLeft className="w-4 h-4" /> Return Home
-         </Link>
-
-         {/* Jemari Platform Watermark */}
-         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-8 flex justify-center items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] opacity-50"></span>
-            Powered by Jemari App
-         </p>
-      </div>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-center p-6 selection:bg-flx-teal selection:text-black">
+       <div className="absolute top-0 left-0 w-full h-[60vh] bg-gradient-to-b from-flx-teal/10 via-black to-black pointer-events-none" />
+       <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mb-8 relative z-10 p-5 mt-[-10vh]">
+          <Activity className="w-12 h-12 text-flx-teal animate-pulse" />
+       </div>
+       <h1 className="text-6xl font-black text-white tracking-tighter mb-4 relative z-10">404</h1>
+       <h2 className="text-xl font-bold text-gray-300 mb-6 relative z-10">Lost in the Void</h2>
+       <p className="text-gray-500 max-w-sm mb-10 relative z-10">
+         We couldn't find the page you were looking for. The route might have been moved, deleted, or never existed at all.
+       </p>
+       <Link href="/" className="px-8 py-3 bg-white text-black font-extrabold uppercase tracking-wide rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(255,255,255,0.2)] relative z-10">
+         Return to Base
+       </Link>
     </div>
   );
 }

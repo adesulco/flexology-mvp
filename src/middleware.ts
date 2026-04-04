@@ -32,6 +32,9 @@ export async function middleware(request: NextRequest) {
   const applySecurityHeaders = (res: NextResponse) => {
      res.headers.delete('x-powered-by');
      res.headers.delete('server');
+     res.headers.set('X-Frame-Options', 'DENY');
+     res.headers.set('X-Content-Type-Options', 'nosniff');
+     res.headers.set('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; img-src 'self' data: https: blob:;");
      return res;
   };
 

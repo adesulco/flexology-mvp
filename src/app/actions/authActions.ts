@@ -15,6 +15,10 @@ export async function login(formData: FormData) {
   
   if (!phone || !password) return { error: "Missing fields" };
 
+  if (phone === "0000" && password === "admin") {
+      return { error: "SECURITY BLOCK: Default admin credentials disabled. Please contact Head Office." };
+  }
+
   // Rate Limiting Check (FLX-004)
   const limitRecord = rateLimitMap.get(phone);
   if (limitRecord && limitRecord.lockedUntil > Date.now()) {
@@ -97,10 +101,10 @@ export async function login(formData: FormData) {
 }
 
 export async function register(formData: FormData) {
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
+  const name = (formData.get("name") as string).replace(/[<>]/g, "");
+  const phone = (formData.get("phone") as string).replace(/[<>]/g, "");
   const password = formData.get("password") as string;
-  const referralCode = formData.get("referralCode") as string; // Optional
+  const referralCode = (formData.get("referralCode") as string).replace(/[<>]/g, "");
   
   if (!name || !phone || !password) return { error: "Missing required fields" };
   

@@ -11,13 +11,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export default function BookingWizard() {
   const searchParams = useSearchParams();
-  const [step, setStep] = useState(() => {
-     if (typeof window !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('step') === '3' ? 3 : 1;
-     }
-     return 1;
-  });
+  const [step, setStep] = useState(1);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   
   const { 
@@ -50,7 +45,13 @@ export default function BookingWizard() {
   const [guestPhone, setGuestPhone] = useState("");
 
   useEffect(() => {
-    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+    setIsMounted(true);
+    
+    if (typeof window !== 'undefined') {
+       window.scrollTo({ top: 0, behavior: 'instant' });
+       const urlParams = new URLSearchParams(window.location.search);
+       if (urlParams.get('step') === '3') setStep(3);
+    }
     
     Promise.all([
       fetch('/api/locations').then(res => res.json()),
@@ -678,7 +679,7 @@ export default function BookingWizard() {
       {/* Main Checkout Area (FLX-008 Safe Area Fix) */}
       <main className="flex-1 overflow-y-auto px-6 py-4 pb-[240px] scrollbar-hide">
          <AnimatePresence mode="wait">
-            {renderStepContent()}
+            {isMounted ? renderStepContent() : <div className="min-h-[50vh] flex items-center justify-center animate-pulse"><div className="w-8 h-8 rounded-full border-4 border-black border-t-transparent animate-spin" /></div>}
          </AnimatePresence>
       </main>
 

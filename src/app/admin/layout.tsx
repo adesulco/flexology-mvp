@@ -19,7 +19,7 @@ export default async function AdminLayout({
            <Copyleft className="w-8 h-8 text-flx-teal" />
            <div className="flex items-end gap-2">
               <h1 className="text-xl font-bold tracking-tight leading-none">Flex Admin</h1>
-              <span className="text-[10px] font-mono text-gray-500 font-bold bg-white/10 px-1.5 py-0.5 rounded leading-none mb-0.5">v0.9.0</span>
+              <span className="text-[10px] font-mono text-gray-500 font-bold bg-white/10 px-1.5 py-0.5 rounded leading-none mb-0.5">v0.9.1</span>
            </div>
          </div>
          <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">

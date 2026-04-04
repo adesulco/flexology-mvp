@@ -4,13 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { getTenant } from "@/lib/tenant";
 import dynamic from 'next/dynamic';
 
-const AppHomepageUI = dynamic(() => import('@/components/AppHomepageUI').then(mod => mod.AppHomepageUI), {
-  loading: () => <div className="min-h-[100dvh] w-full flex items-center justify-center animate-pulse bg-gray-50"><div className="w-12 h-12 rounded-full bg-gray-200" /></div>
-});
+import { DynamicAppHomepageUI } from '@/components/DynamicAppHomepageUI';
 
-const MarketplaceHomepageUI = dynamic(() => import('@/components/MarketplaceHomepageUI').then(mod => mod.MarketplaceHomepageUI), {
-  loading: () => <div className="min-h-screen w-full flex items-center justify-center animate-pulse bg-gray-50"><div className="w-12 h-12 rounded-full bg-gray-200" /></div>
-});
+import { DynamicMarketplaceHomepageUI } from '@/components/DynamicMarketplaceHomepageUI';
 
 export const revalidate = 60;
 
@@ -25,7 +21,7 @@ export default async function Home() {
           prisma.service.findMany({ where: { isActive: true }, include: { tenant: true }, take: 10, orderBy: { price: 'desc' } })
       ]);
       
-      return <MarketplaceHomepageUI brands={allBrands} services={allServices} />;
+      return <DynamicMarketplaceHomepageUI brands={allBrands} services={allServices} />;
   }
 
   // If the user has a valid login cookie, show the Mobile App Booking Dashboard
@@ -50,7 +46,7 @@ export default async function Home() {
           include: { service: true, location: true, flexologist: true }
        });
        
-       return <AppHomepageUI user={user} lastBooking={lastBooking} tenant={tenant} />;
+       return <DynamicAppHomepageUI user={user} lastBooking={lastBooking} tenant={tenant} />;
     }
   }
 

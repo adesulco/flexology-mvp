@@ -29,28 +29,19 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-tenant-slug', tenantSlug);
 
-  // Content Security Policy (FLX-002)
-  const nonce = btoa(String.fromCharCode(...new Uint8Array(crypto.getRandomValues(new Uint8Array(16)))));
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https:;
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data: https:;
-    font-src 'self' data:;
-    connect-src 'self';
-    frame-ancestors 'none';
-  `.replace(/\s{2,}/g, ' ').trim()
-
-  requestHeaders.set('x-nonce', nonce)
-  requestHeaders.set('Content-Security-Policy', cspHeader)
+  const applySecurityHeaders = (res: NextResponse) => {
+     res.headers.delete('x-powered-by');
+     res.headers.delete('server');
+     return res;
+  };
 
   // Public paths that bypass auth checking (Guest Checkout enabled for /book)
-  if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.') || path === '/pos/login') {
+  if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/services') || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.') || path === '/pos/login') {
     // If we get a clear=true flag, forcibly strip the token
     if (request.nextUrl.searchParams.get('clear') === 'true') {
         const res = NextResponse.redirect(new URL('/login', request.url))
         res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-        return res
+        return applySecurityHeaders(res)
     }
     // Check if token exists AND is actually valid before bouncing
     if (token && (path === '/login' || path === '/register')) {
@@ -63,53 +54,55 @@ export async function middleware(request: NextRequest) {
              request: { headers: requestHeaders }
           });
           res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-          return res
+          return applySecurityHeaders(res)
        }
     }
     const response = NextResponse.next({ request: { headers: requestHeaders } });
-    response.headers.set('Content-Security-Policy', cspHeader);
-    return response;
+    return applySecurityHeaders(response);
   }
 
-  // If trying to access protected paths without token
+  // Verify standard auth via jwt
   if (!token) {
-    return NextResponse.redirect(new URL('/', request.url))
+    if (path.startsWith('/admin')) {
+       return applySecurityHeaders(NextResponse.redirect(new URL('/login', request.url)));
+    }
+    return applySecurityHeaders(NextResponse.redirect(new URL('/', request.url)));
   } else {
     try {
-      // Validate token structure
-      const { payload } = await jwtVerify(token, JWT_SECRET)
+      const { payload } = await jwtVerify(token, JWT_SECRET);
       
       // Admin protection block
       if (path.startsWith('/admin')) {
         if (payload.role !== 'SUPER_ADMIN' && payload.role !== 'OUTLET_MANAGER' && payload.role !== 'GLOBAL_MANAGER') {
-           return NextResponse.redirect(new URL('/profile', request.url)) // Bounce back
+           return applySecurityHeaders(NextResponse.redirect(new URL('/profile', request.url)));
         }
         
         // Strict Firewall for Outlet Managers
         if (payload.role === 'OUTLET_MANAGER') {
            if (path.startsWith('/admin/staff') || path.startsWith('/admin/outlets') || path.startsWith('/admin/settings')) {
-              return NextResponse.redirect(new URL('/admin', request.url))
+              return applySecurityHeaders(NextResponse.redirect(new URL('/admin/schedule', request.url)));
            }
         }
       }
       
       // POS protection block
-      if (path.startsWith('/pos')) {
-        if (payload.role !== 'SUPER_ADMIN' && payload.role !== 'OUTLET_MANAGER' && payload.role !== 'OUTLET_ADMIN') {
-           return NextResponse.redirect(new URL('/pos/login', request.url)) // Bounce back
+      if (path.startsWith('/pos') || path.startsWith('/admin/pos')) {
+        if (!['SUPER_ADMIN', 'OUTLET_MANAGER', 'OUTLET_ADMIN', 'GLOBAL_MANAGER'].includes(payload.role as string)) {
+           return applySecurityHeaders(NextResponse.redirect(new URL('/pos/login', request.url)));
         }
       }
     } catch (e) {
       // Invalid token, force re-login and actually clear the browser cookie
-      const res = NextResponse.redirect(new URL('/', request.url))
+      const res = NextResponse.redirect(new URL('/login', request.url))
       res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-      return res
+      return applySecurityHeaders(res)
     }
   }
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
-  response.headers.set('Content-Security-Policy', cspHeader);
-  return response;
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  })
+  return applySecurityHeaders(response);
 }
 
 export const config = {

@@ -68,9 +68,12 @@ export default async function SettingsPage() {
             </ConfirmForm>
             <ConfirmForm action={updateSystemSetting} className="flex gap-4 items-end">
                <div className="flex-1">
-                  <label htmlFor="feeCc" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block">Credit Card Rate % (e.g. 0.029 for 2.9%)</label>
+                  <label htmlFor="feeCc" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1 mb-1 block flex items-center justify-between">
+                     Credit Card Rate % (e.g. 0.029)
+                     <span className="text-flx-teal font-mono">{(Number(feeCc) * 100).toFixed(1)}% Active Rate</span>
+                  </label>
                   <input type="hidden" name="key" value="FEE_CC" />
-                  <input id="feeCc" type="text" pattern="^\d+(\.\d{1,3})?$" name="value" defaultValue={feeCc} placeholder="0.029" className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
+                  <input id="feeCc" type="text" pattern="^\d+(\.\d{1,4})?$" name="value" defaultValue={feeCc} placeholder="0.029" className="w-full p-2.5 bg-white border border-gray-200 rounded-lg outline-none focus:ring-1 focus:ring-black text-sm font-mono" />
                </div>
                <button type="submit" className="px-6 py-2.5 bg-black text-white text-xs font-bold rounded-lg hover:bg-black/90 transition-all">
                   Save

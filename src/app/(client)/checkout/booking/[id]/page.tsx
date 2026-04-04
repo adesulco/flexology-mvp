@@ -30,9 +30,9 @@ export default async function BookingCheckout({ params }: { params: { id: string
   const systemConfigs = await prisma.systemSetting.findMany();
   const getConfig = (key: string, _default: string) => systemConfigs.find((c: any) => c.key === key)?.value || _default;
   const fees = {
-      qris: parseFloat(getConfig('FEE_QRIS', "0.007")),
+      qris: parseFloat(getConfig('FEE_QRIS', "0.007").replace(',', '.')),
       va: parseInt(getConfig('FEE_VA', "4000")),
-      cc: parseFloat(getConfig('FEE_CC', "0.02"))
+      cc: parseFloat(getConfig('FEE_CC', "0.02").replace(',', '.'))
   };
 
   return (

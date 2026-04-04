@@ -2,8 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { format, addDays, subDays, isSameDay, startOfDay, endOfDay } from "date-fns";
-import { CheckCircle2, Clock, MapPin, Activity, X, Settings2, Calendar, List, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, Clock, MapPin, Activity, X, Settings2, Calendar, List, ChevronLeft, ChevronRight, UserPlus } from "lucide-react";
 import { adjustBooking, voidBooking } from "@/app/actions/adminActions";
+import { formatCurrency } from "@/lib/formatters";
 
 const START_HOUR = 8; // 8:00 AM
 const END_HOUR = 22; // 10:00 PM
@@ -231,12 +232,13 @@ export default function OperationsTimeline({
                          <p className="text-[10px] text-gray-500 uppercase font-mono tracking-widest">{col.subtitle}</p>
                       </div>
                    ))}
-                    {gridColumns.length === 0 && (
-                       <div className="flex-1 p-3 text-center flex flex-col items-center justify-center text-xs text-gray-400 font-medium bg-gray-50/50">
-                          <Activity className="w-5 h-5 mb-2 text-gray-300" />
-                          No operational therapists assigned to this outlet.<br/>Please add or assign staff to view the timeline mapping.
-                       </div>
-                    )}
+                    {gridColumns.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-white border border-gray-100 rounded-xl m-4 text-center">
+                       <UserPlus className="w-8 h-8 text-gray-300 mb-3" />
+                       <h3 className="text-gray-900 font-bold mb-1">No Staff Assigned Here</h3>
+                       <p className="text-sm text-gray-500">There are no flexologists assigned to this outlet. Please add staff in the Roster Setup.</p>
+                    </div>
+                 ) : null}
                 </div>
              </div>
 
@@ -245,7 +247,7 @@ export default function OperationsTimeline({
                 <div className="w-20 shrink-0 border-r border-gray-200 flex flex-col relative bg-gray-50/30">
                    {hoursKeys.map(h => (
                       <div key={h} className="flex-1 border-b border-gray-100 p-2 text-right relative min-h-[40px]">
-                         <span className="text-[10px] font-bold text-gray-500 absolute -top-2 right-2 bg-gray-50/30 px-1">{h}:00</span>
+                         <span className="text-[10px] font-bold text-gray-500 absolute -top-2 right-2 bg-gray-50/30 px-1">{format(new Date().setHours(h, 0), 'HH:mm')}</span>
                       </div>
                    ))}
                 </div>
@@ -423,7 +425,7 @@ export default function OperationsTimeline({
                            <Activity className="w-4 h-4 text-flx-teal opacity-70" />
                            <div>
                               <p className="font-semibold text-gray-900">{b.service?.name || "Service"}</p>
-                              <p className="text-[10px] font-mono text-emerald-600 font-bold">{(b.totalPrice / 1000).toFixed(0)}K IDR &nbsp;•&nbsp; <span className="text-gray-500">{b.service?.duration || 60} mins</span></p>
+                              <p className="text-[10px] font-mono text-emerald-600 font-bold">{formatCurrency(b.totalPrice)} &nbsp;•&nbsp; <span className="text-gray-500">{b.service?.duration || 60} mins</span></p>
                            </div>
                          </div>
                        </td>
@@ -519,7 +521,7 @@ export default function OperationsTimeline({
                              <p className="font-bold text-gray-900">{selectedBooking.service?.name}</p>
                              <p className="text-sm text-gray-500">{selectedBooking.service?.duration} Minutes</p>
                           </div>
-                          <p className="font-mono font-bold text-emerald-700">{selectedBooking.totalPrice.toLocaleString()} IDR</p>
+                          <p className="font-mono font-bold text-emerald-700">{formatCurrency(selectedBooking.totalPrice)}</p>
                        </div>
                     </div>
 

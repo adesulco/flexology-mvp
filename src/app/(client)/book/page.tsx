@@ -1,9 +1,10 @@
 "use client";
 
 import { useBookingStore, Location, Service, Flexologist } from "@/store/useBookingStore";
+import { formatCurrency } from "@/lib/formatters";
 import { useState, useEffect, useMemo } from "react";
 import { format, addDays } from "date-fns";
-import { ChevronLeft, MapPin, Clock, Star, Activity, CheckCircle2, ChevronRight, User, CalendarClock, Flame } from "lucide-react";
+import { CheckCircle2, ChevronLeft, CalendarClock, ChevronRight, MapPin, Activity, Star, Tag, Sparkles, Clock, User, Flame } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -206,6 +207,12 @@ export default function BookingWizard() {
      return flexologists.filter(f => {
         if (f.isOnDuty === false) return false;
         
+        if (mode === 'outlet' && selectedLocation) {
+           if (f.locationId && f.locationId !== selectedLocation.id) return false;
+        } else if (mode === 'home') {
+           if (!f.canHomeService) return false;
+        }
+        
         const [startH, startM] = (f.shiftStart || "08:00").split(":").map(Number);
         const [endH, endM] = (f.shiftEnd || "22:00").split(":").map(Number);
         
@@ -216,7 +223,7 @@ export default function BookingWizard() {
         
         return true;
      });
-  }, [flexologists, selectedTime, selectedService]);
+  }, [flexologists, selectedTime, selectedService, mode, selectedLocation]);
   const renderStepContent = () => {
     switch (step) {
       case 1:
@@ -355,7 +362,7 @@ export default function BookingWizard() {
                     </div>
                     <div className="flex justify-between items-center text-sm font-semibold">
                       <span className="flex items-center gap-1.5 bg-flx-card border border-flx-border px-3 py-1.5 rounded-full"><Clock className="w-3.5 h-3.5 text-flx-teal" /> {srv.duration} min</span>
-                      <span className="text-flx-text">IDR {(srv.price / 1000).toFixed(0)}K</span>
+                      <span className="text-flx-text">{formatCurrency(srv.price)}</span>
                     </div>
                   </div>
                 </div>
@@ -489,7 +496,7 @@ export default function BookingWizard() {
                   <p className="font-semibold text-base text-flx-text">{selectedService?.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">Rp {basePrice.toLocaleString('id-ID')}</p>
+                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">{formatCurrency(basePrice)}</p>
                   <p className="text-[10px] bg-flx-card border border-flx-border px-2 py-0.5 rounded-md inline-block text-flx-text">{selectedService?.duration} min</p>
                 </div>
               </div>
@@ -499,7 +506,7 @@ export default function BookingWizard() {
                    <hr className="border-flx-border/30 border-dashed" />
                    <div className="flex justify-between items-center bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                      <span className="text-xs font-bold text-green-700 uppercase tracking-tight flex items-center gap-1.5"><Star className="w-3 h-3" /> {dbTier.replace('_', ' ')} Discount</span>
-                     <span className="text-xs font-mono font-bold text-green-600">-IDR {(tierDiscountAmount / 1000).toFixed(0)}K</span>
+                     <span className="text-xs font-mono font-bold text-green-600">-{formatCurrency(tierDiscountAmount)}</span>
                    </div>
                  </>
               )}
@@ -509,7 +516,7 @@ export default function BookingWizard() {
                    <hr className="border-flx-border/30 border-dashed" />
                    <div className="flex justify-between items-center bg-yellow-50/80 p-2.5 rounded-xl border border-yellow-200">
                      <span className="text-xs font-bold text-yellow-800 uppercase tracking-tight flex items-center gap-1.5">⚡ AI Happy Hour</span>
-                     <span className="text-xs font-mono font-bold text-yellow-700">-IDR {(aiDiscountAmount / 1000).toFixed(0)}K</span>
+                     <span className="text-xs font-mono font-bold text-yellow-700">-{formatCurrency(aiDiscountAmount)}</span>
                    </div>
                  </>
               )}
@@ -638,10 +645,10 @@ export default function BookingWizard() {
                <span className="font-bold text-white">Total Due</span>
                <div className="flex flex-col items-end">
                   {usePoints && pointsToUse > 0 && selectedService && (
-                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">Rp {priceAfterTierAndAI.toLocaleString('id-ID')}</span>
+                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">{formatCurrency(priceAfterTierAndAI)}</span>
                   )}
                   <span className="text-xl font-mono text-white font-bold">
-                     Rp {selectedService ? (priceAfterTierAndAI - (usePoints ? pointsToUse : 0)).toLocaleString('id-ID') : 0}
+                     {selectedService ? formatCurrency(priceAfterTierAndAI - (usePoints ? pointsToUse : 0)) : formatCurrency(0)}
                   </span>
                </div>
             </div>
@@ -669,7 +676,7 @@ export default function BookingWizard() {
       </header>
 
       {/* Main Checkout Area (FLX-008 Safe Area Fix) */}
-      <main className="flex-1 overflow-y-auto px-6 py-4 pb-[140px] scrollbar-hide">
+      <main className="flex-1 overflow-y-auto px-6 py-4 pb-[240px] scrollbar-hide">
          <AnimatePresence mode="wait">
             {renderStepContent()}
          </AnimatePresence>

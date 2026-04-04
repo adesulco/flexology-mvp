@@ -16,25 +16,28 @@ export default async function ExecutiveDashboard() {
   const tenant = await getTenant();
 
   // 1. Fetch Aggregated Bookings First
-  const bookings = await prisma.booking.findMany({
-     where: { tenantId: tenant?.id },
-     include: {
-        location: true,
-        service: true
-     }
-  });
+  const [bookings, allLocations] = await Promise.all([
+    prisma.booking.findMany({
+       where: { tenantId: tenant?.id },
+       include: {
+          location: true,
+          service: true
+       }
+    }),
+    prisma.location.findMany({ where: { tenantId: tenant?.id, isActive: true } })
+  ]);
 
   const totalBookings = bookings.length;
   const confirmedBookings = bookings.filter(b => b.status === "CONFIRMED" || b.status === "COMPLETED").length;
   const voidedBookings = bookings.filter(b => b.status === "CANCELLED").length;
 
-  // 2. Calculate Gross Revenue from the EXACT same dataset as Leaderboard
-  const totalRevenue = bookings
-     .filter(b => b.status !== "CANCELLED")
-     .reduce((acc: number, curr: any) => acc + (curr.totalPrice || 0), 0);
-
   // 3. Outlet Leaderboard Math
   const outletMap: Record<string, { name: string, volume: number, count: number }> = {};
+  
+  // Pre-fill all active locations with 0
+  allLocations.forEach(loc => {
+      outletMap[loc.id] = { name: loc.name, volume: 0, count: 0 };
+  });
   bookings.forEach(b => {
      if (b.status === "CANCELLED") return; // Don't count voided for leaderboard
      
@@ -45,10 +48,13 @@ export default async function ExecutiveDashboard() {
      outletMap[id].count += 1;
      // Note: we approximate revenue via service price if PaymentTransactions aren't strictly linked, 
      // or just use `b.totalPrice`. We'll use booking's totalPrice.
-     outletMap[id].volume += b.totalPrice;
+     outletMap[id].volume += Number(b.totalPrice || 0);
   });
 
   const leaderboard = Object.values(outletMap).sort((a, b) => b.volume - a.volume);
+  
+  // 2. Calculate Gross Revenue strictly from the aggregators to maintain parity
+  const totalRevenue = leaderboard.reduce((acc, curr) => acc + curr.volume, 0);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-24">

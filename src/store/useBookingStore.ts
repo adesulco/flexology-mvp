@@ -30,6 +30,7 @@ export interface Flexologist {
   imageUrl: string;
   locationId?: string;
   isOnDuty?: boolean;
+  canHomeService?: boolean;
   shiftStart?: string;
   shiftEnd?: string;
 }

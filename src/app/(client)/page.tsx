@@ -1,10 +1,20 @@
 import { getSession } from "@/lib/auth";
-import dynamic from 'next/dynamic';
-const LandingPageUI = dynamic(() => import('@/components/LandingPageUI').then(mod => mod.LandingPageUI), { ssr: true });
-const AppHomepageUI = dynamic(() => import('@/components/AppHomepageUI').then(mod => mod.AppHomepageUI), { ssr: true });
-const MarketplaceHomepageUI = dynamic(() => import('@/components/MarketplaceHomepageUI').then(mod => mod.MarketplaceHomepageUI), { ssr: true });
+import { LandingPageUI } from '@/components/LandingPageUI';
 import { prisma } from "@/lib/prisma";
 import { getTenant } from "@/lib/tenant";
+import dynamic from 'next/dynamic';
+
+const AppHomepageUI = dynamic(() => import('@/components/AppHomepageUI').then(mod => mod.AppHomepageUI), {
+  ssr: false,
+  loading: () => <div className="min-h-[100dvh] w-full flex items-center justify-center animate-pulse bg-gray-50"><div className="w-12 h-12 rounded-full bg-gray-200" /></div>
+});
+
+const MarketplaceHomepageUI = dynamic(() => import('@/components/MarketplaceHomepageUI').then(mod => mod.MarketplaceHomepageUI), {
+  ssr: false,
+  loading: () => <div className="min-h-screen w-full flex items-center justify-center animate-pulse bg-gray-50"><div className="w-12 h-12 rounded-full bg-gray-200" /></div>
+});
+
+export const revalidate = 60;
 
 export default async function Home() {
   const session = await getSession();

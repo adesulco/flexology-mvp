@@ -7,12 +7,12 @@ import { startOfDay, endOfDay } from "date-fns";
 
 export default async function PosDashboard() {
   const session = await getSession();
-  if (!session || (session.role !== "OUTLET_ADMIN" && session.role !== "OUTLET_MANAGER" && session.role !== "SUPER_ADMIN")) {
+  if (!session || (session.role !== "OUTLET_ADMIN" && session.role !== "OUTLET_MANAGER" && session.role !== "SUPER_ADMIN" && session.role !== "GLOBAL_MANAGER")) {
       redirect("/pos/login");
   }
 
-  // Filter scoped to Outlet Manager / Admin, bypass for Super Admin
-  const targetOutletId = session.role === "SUPER_ADMIN" ? undefined : (session.managedLocationId as string | undefined);
+  // Filter scoped to Outlet Manager / Admin, bypass for Super Admin & Global Manager
+  const targetOutletId = (session.role === "SUPER_ADMIN" || session.role === "GLOBAL_MANAGER") ? undefined : (session.managedLocationId as string | undefined);
   const todayStart = startOfDay(new Date());
   const todayEnd = endOfDay(new Date());
 

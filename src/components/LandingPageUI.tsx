@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
+import { formatCurrency } from "@/lib/formatters";
 import { Copyleft, ArrowRight, Activity, MapPin, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -92,7 +93,7 @@ export function LandingPageUI({ services = [], tenant }: { services?: any[], ten
            >
               <motion.div variants={itemVariants} className="flex items-center justify-between mb-4 w-full px-2">
                  <h2 className="text-white text-lg font-bold tracking-tight">Featured Services</h2>
-                 <Link href="/book" className="text-[10px] text-flx-teal uppercase tracking-widest font-bold hover:underline">See All</Link>
+                 <Link href="/services" className="text-[10px] text-flx-teal uppercase tracking-widest font-bold hover:underline">See All</Link>
               </motion.div>
               
               <div className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory hide-scrollbars -mx-6 px-6 sm:mx-0 sm:px-0">
@@ -113,7 +114,7 @@ export function LandingPageUI({ services = [], tenant }: { services?: any[], ten
                           <span className="text-xs text-gray-400 font-medium">{service.duration} Min</span>
                        </div>
                        <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-sm font-bold text-white font-mono">IDR {(service.price / 1000).toFixed(0)}K</span>
+                          <span className="text-sm font-bold text-white font-mono">{formatCurrency(service.price)}</span>
                           <ArrowRight className="w-4 h-4 text-flx-teal opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                        </div>
                     </motion.div>

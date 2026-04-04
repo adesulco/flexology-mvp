@@ -1,6 +1,7 @@
 import { Header } from "@/components/Header";
 import { CalendarClock, MapPin, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/lib/formatters";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
@@ -70,7 +71,7 @@ export default async function Bookings() {
                    </div>
 
                    <h3 className="text-lg font-bold text-flx-text tracking-tight mb-1">{b.service.name}</h3>
-                   <p className="text-sm text-flx-text-muted mb-4">{b.service.duration} mins • Rp {(b.totalPrice / 1000).toLocaleString()}K</p>
+                   <p className="text-sm text-flx-text-muted mb-4">{b.service.duration} mins • {formatCurrency(b.totalPrice)}</p>
 
                    <div className="bg-flx-dark rounded-xl p-3 border border-flx-border space-y-2">
                        {b.mode === 'OUTLET' ? (

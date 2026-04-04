@@ -27,7 +27,7 @@ export default async function StaffManagement() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-1">Staff Roster Setup</h2>
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-1">Staff Management</h2>
         <p className="text-gray-500">Add new therapists and assign them to Home Service or a specific physical Outlet.</p>
       </div>
 
@@ -45,7 +45,7 @@ export default async function StaffManagement() {
            <form action={createFlexologist} className="space-y-4">
               <div>
                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Full Name</label>
-                <input type="text" name="name" required className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="Sarah Jenkins" />
+                <input type="text" name="name" required className="w-full mt-1 p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-1 focus:ring-black outline-none transition-all" placeholder="Enter full name" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Specialty / Bio</label>

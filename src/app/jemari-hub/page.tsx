@@ -1,4 +1,6 @@
+import { formatRate } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
+import { formatRupiah } from "@/lib/format";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Activity, DollarSign, Users, Building2, PlusCircle, Network } from "lucide-react";
@@ -74,21 +76,21 @@ export default async function PlatformHub() {
                 <div className="text-blue-500 mb-4"><DollarSign className="w-6 h-6" /></div>
                 <div>
                    <p className="text-sm font-bold text-gray-400 mb-1">Global GMV</p>
-                   <h3 className="text-3xl font-black">Rp {totalRevenue.toLocaleString()}</h3>
+                   <h3 className="text-3xl font-black">{formatRupiah(totalRevenue)}</h3>
                 </div>
              </div>
              <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl flex flex-col justify-between">
                 <div className="text-green-500 mb-4"><Activity className="w-6 h-6" /></div>
                 <div>
                    <p className="text-sm font-bold text-gray-400 mb-1">Estimated MRR</p>
-                   <h3 className="text-3xl font-black">Rp {mrr.toLocaleString()}</h3>
+                   <h3 className="text-3xl font-black">{formatRupiah(mrr)}</h3>
                 </div>
              </div>
              <div className="bg-gradient-to-br from-indigo-900 to-black border border-indigo-800 p-6 rounded-2xl flex flex-col justify-between">
                 <div className="text-indigo-400 mb-4"><Users className="w-6 h-6" /></div>
                 <div>
                    <p className="text-sm font-bold text-indigo-300 mb-1">Platform Bookings</p>
-                   <h3 className="text-4xl font-black text-white">{allBookings.length.toLocaleString()}</h3>
+                   <h3 className="text-4xl font-black text-white">{formatRate(allBookings.length)}</h3>
                 </div>
              </div>
           </div>
@@ -163,7 +165,7 @@ export default async function PlatformHub() {
                                
                                <div className="text-right">
                                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Generated Volume</p>
-                                  <p className="font-mono text-lg font-bold">Rp {stats.volume.toLocaleString()}</p>
+                                  <p className="font-mono text-lg font-bold">{formatRupiah(stats.volume)}</p>
                                </div>
                                
                                <div className="pl-6 border-l border-gray-800">

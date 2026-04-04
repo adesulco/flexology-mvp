@@ -1,14 +1,14 @@
 "use client";
 
+
 import { useState } from "react";
 import { login } from "@/app/actions/authActions";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,12 +39,7 @@ export default function LoginPage() {
         </div>
         <div>
            <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Password</label>
-           <div className="relative mt-1">
-             <input type={showPassword ? "text" : "password"} name="password" required className="w-full p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all pr-12" placeholder="••••••••" />
-             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black">
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-             </button>
-           </div>
+           <PasswordInput />
            <div className="flex justify-end pt-2">
              <Link href="/forgot-password" className="text-[10px] font-bold text-gray-500 hover:text-black hover:underline uppercase tracking-wider">Forgot password?</Link>
            </div>

@@ -1,4 +1,6 @@
 "use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -13,8 +15,8 @@ export async function processPosManualCheckout(formData: FormData) {
    }
 
    const bookingId = formData.get("bookingId") as string;
-   const paymentMethod = formData.get("paymentMethod") as string || "CASH";
-   const tenderedAmount = parseInt(formData.get("tenderedAmount") as string || "0", 10);
+   const paymentMethod = sanitizeText(formData.get("paymentMethod") as string) || "CASH";
+   const tenderedAmount = parseInt(sanitizeText(formData.get("tenderedAmount") as string) || "0", 10);
    
    if (!bookingId) throw new Error("Invalid parameters");
 

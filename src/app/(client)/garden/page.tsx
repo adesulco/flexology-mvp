@@ -1,3 +1,4 @@
+import { formatRupiah, formatRate } from "@/lib/format";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/Header";
@@ -122,7 +123,7 @@ export default async function ZenGardenPage() {
                     <Sparkles className="w-4 h-4 text-yellow-500" />
                     <span className="text-xs font-bold uppercase tracking-wider">Total XP</span>
                  </div>
-                 <h2 className="text-3xl font-mono font-black text-white">{points.toLocaleString()}</h2>
+                 <h2 className="text-3xl font-mono font-black text-white">{formatRate(points)}</h2>
              </div>
              
              <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-md">

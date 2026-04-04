@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV === 'production') {
+  console.log('SECURITY: Seed script blocked in production environment.');
+  process.exit(0);
+}
+
 import { PrismaClient } from '@prisma/client'
 import { MOCK_LOCATIONS, MOCK_SERVICES, MOCK_FLEXOLOGISTS } from '../src/lib/mockData'
 

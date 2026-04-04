@@ -1,42 +1,40 @@
 "use server";
 
+
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signToken, clearSession } from "@/lib/auth";
+import { sanitizeText, sanitizePhone } from "@/lib/sanitize";
+import { checkLoginRateLimit } from "@/lib/rateLimit";
+import { headers } from "next/headers";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// In-memory brute force protection (Ephemeral per lambda, but stops generic scripts)
-const rateLimitMap = new Map<string, { count: number, lockedUntil: number }>();
-
 export async function login(formData: FormData) {
-  const phone = formData.get("phone") as string;
+  // RATE LIMIT CHECK — runs before anything else
+  const headersList = await headers();
+  const forwarded = headersList.get('x-forwarded-for');
+  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
+
+  const rateCheck = await checkLoginRateLimit(ip);
+  if (!rateCheck.allowed) {
+    return {
+      error: `Too many login attempts. Please try again in ${rateCheck.retryAfter} seconds.`,
+    };
+  }
+
+  // BLOCKED CREDENTIALS CHECK — runs second (from Mission 3)
+  const BLOCKED_USERNAMES = new Set(['0000', 'admin', 'test', 'demo', 'root', 'superadmin']);
+  const phone = (sanitizeText(formData.get('phone') as string) || '').trim();
+  if (BLOCKED_USERNAMES.has(phone.toLowerCase())) {
+    return { error: 'Invalid credentials' };
+  }
+
   const password = formData.get("password") as string;
-  
   if (!phone || !password) return { error: "Missing fields" };
-
-  if (phone === "0000" && password === "admin") {
-      return { error: "SECURITY BLOCK: Default admin credentials disabled. Please contact Head Office." };
-  }
-
-  // Rate Limiting Check (FLX-004)
-  const limitRecord = rateLimitMap.get(phone);
-  if (limitRecord && limitRecord.lockedUntil > Date.now()) {
-     return { error: `Too many attempts. Account locked for 15 minutes.` };
-  }
 
   // Helper to handle failures
   const recordFailure = () => {
-      const rec = rateLimitMap.get(phone) || { count: 0, lockedUntil: 0 };
-      rec.count += 1;
-      
-      if (rec.count >= 10) {
-          rec.lockedUntil = Date.now() + 24 * 60 * 60 * 1000; // 24 hours lock
-      } else if (rec.count >= 5) {
-          rec.lockedUntil = Date.now() + 15 * 60 * 1000; // 15 mins lock
-      }
-      
-      rateLimitMap.set(phone, rec);
       return { error: "Invalid credentials" };
   };
 
@@ -75,9 +73,7 @@ export async function login(formData: FormData) {
     if (!isValid) return recordFailure();
   }
 
-  // Clear rate limits on success
-  rateLimitMap.delete(phone);
-
+  // Authentication success
   const token = await signToken({ 
     userId: user.id, 
     email: user.email || "", 
@@ -87,7 +83,7 @@ export async function login(formData: FormData) {
   });
 
   const cookieStore = await cookies();
-  cookieStore.set("flex_session", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
+  cookieStore.set("flex_session", token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
   
   if (user.role === 'SUPER_ADMIN' || user.role === 'OUTLET_MANAGER' || user.role === 'GLOBAL_MANAGER') {
     return redirect("/admin");
@@ -101,12 +97,16 @@ export async function login(formData: FormData) {
 }
 
 export async function register(formData: FormData) {
-  const name = (formData.get("name") as string).replace(/[<>]/g, "");
-  const phone = (formData.get("phone") as string).replace(/[<>]/g, "");
+  const name = sanitizeText(formData.get("name") as string);
+  const phone = sanitizePhone(sanitizeText(formData.get("phone") as string));
   const password = formData.get("password") as string;
-  const referralCode = (formData.get("referralCode") as string).replace(/[<>]/g, "");
+  const rawRef = formData.get("referralCode");
+  const referralCode = rawRef ? sanitizeText(rawRef as string) : "";
   
-  if (!name || !phone || !password) return { error: "Missing required fields" };
+  if (!name || name.length < 2) {
+    return { error: 'Please enter a valid name (at least 2 characters)' };
+  }
+  if (!phone || !password) return { error: "Missing required fields" };
   
   const exists = await prisma.user.findUnique({ where: { phoneNumber: phone } });
   if (exists) return { error: "Phone number already registered" };
@@ -152,7 +152,7 @@ export async function register(formData: FormData) {
      
      const token = await signToken({ userId: user.id, email: "", role: user.role, name: user.name });
      const cookieStore = await cookies();
-     cookieStore.set("flex_session", token, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
+     cookieStore.set("flex_session", token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 86400, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined });
   } catch (err: any) {
      console.error("REGISTER ENGINE CRASH:", err);
      return { error: `Failed to create account: ${err.message}` };

@@ -1,4 +1,6 @@
 "use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -12,12 +14,12 @@ export async function createPosBooking(formData: FormData) {
   }
 
   const customerId = formData.get("customerId") as string;
-  const guestName = formData.get("guestName") as string;
-  const guestPhone = formData.get("guestPhone") as string;
+  const guestName = sanitizeText(formData.get("guestName") as string);
+  const guestPhone = sanitizeText(formData.get("guestPhone") as string);
   
   const serviceId = formData.get("serviceId") as string;
   const flexologistId = formData.get("flexologistId") as string;
-  const scheduledDate = formData.get("scheduledDate") as string;
+  const scheduledDate = sanitizeText(formData.get("scheduledDate") as string);
   const locationId = formData.get("locationId") as string || session.managedLocationId as string;
 
   if (!serviceId || !scheduledDate || !locationId) {

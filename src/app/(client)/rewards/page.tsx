@@ -1,3 +1,4 @@
+import { formatRupiah, formatRate } from "@/lib/format";
 import { Header } from "@/components/Header";
 import { Trophy, Star, Gift, Crown, ArrowRight, Zap, CheckCircle2, MessageCircle } from "lucide-react";
 import { getSession } from "@/lib/auth";
@@ -37,7 +38,7 @@ export default async function Rewards() {
            <div className="absolute -top-10 -right-10 w-40 h-40 bg-black/5 blur-[50px] rounded-full" />
            <p className="text-xs uppercase tracking-widest text-flx-text-muted font-bold mb-2">Available Balance</p>
            <div className="flex items-end gap-2 mb-6">
-             <h2 className="text-5xl font-mono font-bold text-black tracking-tighter">{points.toLocaleString()}</h2>
+             <h2 className="text-5xl font-mono font-bold text-black tracking-tighter">{formatRate(points)}</h2>
              <span className="text-flx-teal font-bold mb-1">FLX</span>
            </div>
 
@@ -75,7 +76,7 @@ export default async function Rewards() {
              </div>
              <div>
                 <h4 className="font-bold text-sm text-black">Refer Friends</h4>
-                <p className="text-[10px] text-flx-text-muted">{referralPoints.toLocaleString()} points per referral</p>
+                <p className="text-[10px] text-flx-text-muted">{formatRate(referralPoints)} points per referral</p>
              </div>
           </div>
         </div>
@@ -84,13 +85,13 @@ export default async function Rewards() {
         <div className="mb-10 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-3xl p-6 relative overflow-hidden shadow-sm">
            <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-200/50 blur-3xl rounded-full" />
            <p className="text-xs uppercase tracking-widest text-emerald-800 font-bold mb-1">Spread the Word</p>
-           <h3 className="text-xl font-bold text-emerald-950 mb-2 leading-tight">Give {referralPoints.toLocaleString()} XP,<br />Get {referralPoints.toLocaleString()} XP</h3>
+           <h3 className="text-xl font-bold text-emerald-950 mb-2 leading-tight">Give {formatRate(referralPoints)} XP,<br />Get {formatRate(referralPoints)} XP</h3>
            <p className="text-xs text-emerald-800/80 mb-5 leading-relaxed max-w-[250px]">
-             When a friend tries Flex for the first time using your code, you both instantly earn {referralPoints.toLocaleString()} FLX Points.
+             When a friend tries Flex for the first time using your code, you both instantly earn {formatRate(referralPoints)} FLX Points.
            </p>
            
            <a 
-              href={`https://wa.me/?text=${encodeURIComponent(`I'm gifting you ${referralPoints.toLocaleString()} FLX points to try Flex! Use my invite link: flex.jemariapp.com/ref/${userData.referralCode}`)}`}
+              href={`https://wa.me/?text=${encodeURIComponent(`I'm gifting you ${formatRate(referralPoints)} FLX points to try Flex! Use my invite link: flex.jemariapp.com/ref/${userData.referralCode}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#1ebd59] active:scale-[0.98] transition-all shadow-[0_5px_15px_rgba(37,211,102,0.2)]"

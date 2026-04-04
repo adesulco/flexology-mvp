@@ -1,113 +1,44 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { jwtVerify } from 'jose'
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback_super_secret_flexology_string_for_local_dev"
-)
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('flex_session')?.value
-  const path = request.nextUrl.pathname
-  const hostname = request.headers.get("host") || "";
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get('flex_session')?.value;
+  const isAdminRoute = pathname.startsWith('/admin');
 
-  // Strategy: Subdomain Extraction
-  let tenantSlug = 'flex'; // Default local tenant
-  
-  if (hostname === "jemariapp.com" || hostname === "www.jemariapp.com") {
-      tenantSlug = "root";
-  } else if (hostname.includes(".jemariapp.com")) {
-      tenantSlug = hostname.split(".")[0];
-  } else if (request.nextUrl.searchParams.has("tenant")) {
-      tenantSlug = request.nextUrl.searchParams.get("tenant")!;
-  } else if (request.nextUrl.searchParams.has("root")) {
-      // Local testing override for root marketplace
-      tenantSlug = "root";
-  }
-
-  // Pre-bake the custom header into the request pipeline
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-tenant-slug', tenantSlug);
-
-  const applySecurityHeaders = (res: NextResponse) => {
-     res.headers.delete('x-powered-by');
-     res.headers.delete('server');
-     res.headers.set('X-Frame-Options', 'DENY');
-     res.headers.set('X-Content-Type-Options', 'nosniff');
-     res.headers.set('Content-Security-Policy', "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; img-src 'self' data: https: blob:;");
-     return res;
-  };
-
-  // Public paths that bypass auth checking (Guest Checkout enabled for /book)
-  if (path === '/login' || path === '/register' || path === '/' || path.startsWith('/services') || path.startsWith('/book') || path.startsWith('/api/') || path.startsWith('/_next') || path.includes('.') || path === '/pos/login') {
-    // If we get a clear=true flag, forcibly strip the token
-    if (request.nextUrl.searchParams.get('clear') === 'true') {
-        const res = NextResponse.redirect(new URL('/login', request.url))
-        res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-        return applySecurityHeaders(res)
+  if (isAdminRoute) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
     }
-    // Check if token exists AND is actually valid before bouncing
-    if (token && (path === '/login' || path === '/register')) {
-       try {
-          await jwtVerify(token, JWT_SECRET)
-          return NextResponse.redirect(new URL('/profile', request.url))
-       } catch {
-           // Token is invalid, let them stay on login page and clear it
-          const res = NextResponse.next({
-             request: { headers: requestHeaders }
-          });
-          res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-          return applySecurityHeaders(res)
-       }
-    }
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
-    return applySecurityHeaders(response);
-  }
 
-  // Verify standard auth via jwt
-  if (!token) {
-    if (path.startsWith('/admin')) {
-       return applySecurityHeaders(NextResponse.redirect(new URL('/login', request.url)));
-    }
-    return applySecurityHeaders(NextResponse.redirect(new URL('/', request.url)));
-  } else {
     try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
-      
-      // Admin protection block
-      if (path.startsWith('/admin')) {
-        if (payload.role !== 'SUPER_ADMIN' && payload.role !== 'OUTLET_MANAGER' && payload.role !== 'GLOBAL_MANAGER') {
-           return applySecurityHeaders(NextResponse.redirect(new URL('/profile', request.url)));
-        }
-        
-        // Strict Firewall for Outlet Managers
-        if (payload.role === 'OUTLET_MANAGER') {
-           if (path.startsWith('/admin/staff') || path.startsWith('/admin/outlets') || path.startsWith('/admin/settings')) {
-              return applySecurityHeaders(NextResponse.redirect(new URL('/admin/schedule', request.url)));
-           }
-        }
+      const decoded = await verifyToken(token);
+      if (!decoded) {
+        throw new Error('Invalid token');
       }
-      
-      // POS protection block
-      if (path.startsWith('/pos') || path.startsWith('/admin/pos')) {
-        if (!['SUPER_ADMIN', 'OUTLET_MANAGER', 'OUTLET_ADMIN', 'GLOBAL_MANAGER'].includes(payload.role as string)) {
-           return applySecurityHeaders(NextResponse.redirect(new URL('/pos/login', request.url)));
-        }
+
+      // SECURITY: Block tokens for test accounts (from Mission 3)
+      const BLOCKED_PHONES = ['0000', 'admin', 'test', 'demo', 'root'];
+      if (decoded.phone && BLOCKED_PHONES.includes(decoded.phone.toString().toLowerCase())) {
+        const response = NextResponse.redirect(new URL('/login', request.url));
+        response.cookies.delete('flex_session');
+        return response;
       }
-    } catch (e) {
-      // Invalid token, force re-login and actually clear the browser cookie
-      const res = NextResponse.redirect(new URL('/login', request.url))
-      res.cookies.set('flex_session', '', { maxAge: 0, domain: process.env.NODE_ENV === "production" ? ".jemariapp.com" : undefined })
-      return applySecurityHeaders(res)
+
+      // Valid token, authorized user → allow access
+      return NextResponse.next();
+    } catch {
+      // Invalid/expired token → clear cookie and redirect
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('flex_session');
+      return response;
     }
   }
 
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  })
-  return applySecurityHeaders(response);
+  // Non-admin routes → pass through
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-}
+  matcher: ['/admin/:path*'],
+};

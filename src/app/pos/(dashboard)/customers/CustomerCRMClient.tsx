@@ -1,7 +1,9 @@
 "use client";
 
+
 import { useState } from "react";
 import { format } from "date-fns";
+import { formatRupiah } from "@/lib/format";
 import { Search, UserCircle, Phone, ArrowRight, History, Heart, FileText, Send, X, CheckCircle2, Clock } from "lucide-react";
 import { addCustomerNote } from "@/app/actions/posCrmActions";
 
@@ -87,7 +89,7 @@ export default function CustomerCRMClient({ customers }: { customers: any[] }) {
                        
                        <div className="text-right">
                           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Lifetime Value</p>
-                          <p className="text-2xl font-black text-emerald-600 font-mono tracking-tighter">Rp {(selectedUser.lifteTimeValue / 1000).toLocaleString()}K</p>
+                          <p className="text-2xl font-black text-emerald-600 font-mono tracking-tighter">{formatRupiah(selectedUser.lifteTimeValue)}</p>
                        </div>
                     </div>
                  </div>

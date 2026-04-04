@@ -1,16 +1,19 @@
 "use client";
+import { formatRate } from "@/lib/format";
+
 
 import { useState } from "react";
 import { register } from "@/app/actions/authActions";
 import Link from "next/link";
-import { Copyleft, Eye, EyeOff } from "lucide-react";
+import { Copyleft } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
+import { formatRupiah } from "@/lib/format";
 
 export default function RegisterFormClient({ bonus }: { bonus: string }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
-  const bonusValue = parseInt(bonus, 10).toLocaleString();
+  const rawBonus = parseInt(bonus, 10);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -36,8 +39,8 @@ export default function RegisterFormClient({ bonus }: { bonus: string }) {
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
          </div>
          <div>
-            <h3 className="font-bold text-gray-900 leading-tight">{bonusValue} FLX Points Bonus!</h3>
-            <p className="text-xs text-gray-600">Register today and instantly receive a Rp {bonusValue} value toward your first booking.</p>
+            <h3 className="font-bold text-gray-900 leading-tight">{formatRate(rawBonus)} FLX Points Bonus!</h3>
+            <p className="text-xs text-gray-600">Register today and instantly receive a {formatRupiah(rawBonus)} value toward your first booking.</p>
          </div>
       </div>
 
@@ -54,12 +57,7 @@ export default function RegisterFormClient({ bonus }: { bonus: string }) {
         </div>
         <div>
           <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Password</label>
-          <div className="relative mt-1">
-             <input type={showPassword ? "text" : "password"} name="password" required className="w-full p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-black outline-none transition-all pr-12" placeholder="••••••••" />
-             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-             </button>
-          </div>
+          <PasswordInput />
         </div>
         <div>
           <label className="text-xs font-bold text-flx-text uppercase tracking-widest pl-1">Referral Code (Optional)</label>

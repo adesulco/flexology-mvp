@@ -1,4 +1,6 @@
 "use client";
+import { formatRupiah, formatRate } from "@/lib/format";
+
 
 import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
@@ -24,7 +26,7 @@ export function Header({ points = 0 }: HeaderProps) {
       <div className="flex gap-4 items-center">
         <div className="flex flex-col items-end">
           <span className="text-[10px] uppercase tracking-widest text-flx-teal font-semibold">FLX Points</span>
-          <span className="font-mono font-bold text-sm">{points.toLocaleString()}</span>
+          <span className="font-mono font-bold text-sm">{formatRate(points)}</span>
         </div>
         <button aria-label="Notifications" className="relative p-2.5 rounded-full bg-flx-card border border-flx-border hover:bg-flx-card-hover transition-colors active:scale-95">
           <Bell className="w-4 h-4 text-flx-text" />

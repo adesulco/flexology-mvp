@@ -1,7 +1,8 @@
 "use client";
 
+
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 import { Search, Flame, Star, ChevronRight, MapPin, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -120,7 +121,7 @@ export function MarketplaceHomepageUI({ brands, services }: { brands: any[], ser
                               <div className="flex justify-between items-start">
                                  <h4 className="font-bold text-gray-900 leading-tight mb-1 group-hover:text-blue-600 transition-colors line-clamp-2">{s.name}</h4>
                                  <div className="text-sm font-black bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md whitespace-nowrap ml-2">
-                                    {formatCurrency(s.price)}
+                                    {formatRupiah(s.price)}
                                  </div>
                               </div>
                               <p className="text-xs text-gray-500 flex items-center gap-1.5 font-bold">

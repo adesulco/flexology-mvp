@@ -62,6 +62,12 @@ export default async function PosLayout({
               <FileText className="w-4 h-4 text-gray-400" />
               Daily Reports
             </Link>
+
+            <div className="pt-4 mt-4 border-t border-white/10">
+               <Link href="/admin/schedule" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 font-medium transition-colors">
+                 <span>← Back to Admin</span>
+               </Link>
+            </div>
          </nav>
 
          <div className="p-4 border-t border-white/10 shrink-0">

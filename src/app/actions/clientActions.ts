@@ -1,4 +1,6 @@
 "use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -8,12 +10,12 @@ export async function updateProfile(formData: FormData) {
   const session = await getSession();
   if (!session) return { error: "Unauthorized" };
 
-  const name = formData.get("name") as string;
-  const phone = formData.get("phone") as string;
-  const ageStr = formData.get("age") as string;
-  const gender = formData.get("gender") as string;
-  const prefGender = formData.get("prefGender") as string;
-  const prefPressure = formData.get("prefPressure") as string;
+  const name = sanitizeText(formData.get("name") as string);
+  const phone = sanitizeText(formData.get("phone") as string);
+  const ageStr = sanitizeText(formData.get("age") as string);
+  const gender = sanitizeText(formData.get("gender") as string);
+  const prefGender = sanitizeText(formData.get("prefGender") as string);
+  const prefPressure = sanitizeText(formData.get("prefPressure") as string);
   if (!name || !phone) return { error: "Name and Phone are required" };
 
   try {

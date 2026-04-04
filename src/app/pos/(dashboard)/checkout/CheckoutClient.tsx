@@ -1,7 +1,10 @@
 "use client";
 
+
 import { useState } from "react";
 import { format } from "date-fns";
+import { formatRupiah } from "@/lib/format";
+import { useRouter } from "next/navigation";
 import { processPosManualCheckout, processPosDigitalCheckout, completeDigitalPosCheckout } from "@/app/actions/posCheckoutActions";
 import { Banknote, CreditCard, QrCode, CheckCircle2, AlertCircle, X, Wallet } from "lucide-react";
 
@@ -129,7 +132,7 @@ export default function CheckoutClient({ unpaidBookings, midtransClientKey }: an
                    <div className="mt-8 flex items-center justify-between">
                       <div>
                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Settle</p>
-                         <p className="text-xl font-black text-gray-900 tracking-tight">Rp {b.totalPrice.toLocaleString('id-ID')}</p>
+                         <p className="text-xl font-black text-gray-900 tracking-tight">{formatRupiah(b.totalPrice)}</p>
                       </div>
                       <button 
                          onClick={() => setSelectedBooking(b)}
@@ -159,7 +162,7 @@ export default function CheckoutClient({ unpaidBookings, midtransClientKey }: an
                 <div className="p-6">
                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl mb-6 text-center">
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Balance Due</p>
-                      <p className="text-4xl font-black text-gray-900 tracking-tighter">Rp {selectedBooking.totalPrice.toLocaleString('id-ID')}</p>
+                      <p className="text-4xl font-black text-gray-900 tracking-tighter">{formatRupiah(selectedBooking.totalPrice)}</p>
                    </div>
 
                    {error && <div className="p-3 mb-6 bg-red-50 text-red-600 border border-red-100 rounded-xl text-center text-sm font-bold flex items-center justify-center gap-2"><AlertCircle className="w-4 h-4"/>{error}</div>}
@@ -286,7 +289,7 @@ export default function CheckoutClient({ unpaidBookings, midtransClientKey }: an
                             {changeDue !== null && changeDue > 0 && (
                                <div className="w-full mt-6 p-6 bg-amber-50 border-2 border-amber-200 border-dashed rounded-xl text-center">
                                   <p className="text-xs font-bold text-amber-700 uppercase tracking-widest mb-1">Physical Change Due</p>
-                                  <p className="text-3xl font-black text-amber-900 tracking-tighter">Rp {changeDue.toLocaleString('id-ID')}</p>
+                                  <p className="text-3xl font-black text-amber-900 tracking-tighter">{formatRupiah(changeDue)}</p>
                                </div>
                             )}
 

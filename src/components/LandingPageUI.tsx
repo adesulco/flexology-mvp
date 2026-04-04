@@ -1,7 +1,8 @@
 "use client";
 
+
 import { motion, Variants } from "framer-motion";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 import { Copyleft, ArrowRight, Activity, MapPin, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -114,7 +115,7 @@ export function LandingPageUI({ services = [], tenant }: { services?: any[], ten
                           <span className="text-xs text-gray-400 font-medium">{service.duration} Min</span>
                        </div>
                        <div className="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-sm font-bold text-white font-mono">{formatCurrency(service.price)}</span>
+                          <span className="text-sm font-bold text-white font-mono">{formatRupiah(service.price)}</span>
                           <ArrowRight className="w-4 h-4 text-flx-teal opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                        </div>
                     </motion.div>

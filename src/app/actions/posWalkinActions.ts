@@ -1,4 +1,6 @@
 "use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -11,8 +13,8 @@ export async function addWalkIn(formData: FormData) {
    const outletId = session.managedLocationId as string;
    if (!outletId) throw new Error("Require specific outlet context.");
 
-   const customerName = formData.get("customerName") as string;
-   const customerPhone = formData.get("customerPhone") as string;
+   const customerName = sanitizeText(formData.get("customerName") as string);
+   const customerPhone = sanitizeText(formData.get("customerPhone") as string);
    const serviceId = formData.get("serviceId") as string;
    
    if (!customerName) throw new Error("Name is required");

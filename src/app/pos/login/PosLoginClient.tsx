@@ -1,13 +1,14 @@
 "use client";
 
+
 import { useState } from "react";
 import { login } from "@/app/actions/authActions";
-import { Eye, EyeOff, Activity } from "lucide-react";
+import { Activity } from "lucide-react";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export default function PosLoginClient() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -42,12 +43,10 @@ export default function PosLoginClient() {
         </div>
         <div>
            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Passcode</label>
-           <div className="relative mt-2">
-             <input type={showPassword ? "text" : "password"} name="password" required className="w-full p-4 bg-black/50 text-white border border-white/10 rounded-xl focus:ring-1 focus:ring-flx-teal focus:border-flx-teal outline-none transition-all pr-12 font-mono" placeholder="••••••••" />
-             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-             </button>
-           </div>
+           <PasswordInput 
+              className="w-full bg-black/50 text-white border-white/10" 
+              placeholder="••••••••" 
+           />
         </div>
         
         <button type="submit" disabled={loading} className="w-full py-4 bg-white text-black font-extrabold tracking-wide uppercase rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center h-14 mt-8 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">

@@ -1,5 +1,6 @@
 "use client";
 
+
 import { Header } from "@/components/Header";
 import { motion, Variants } from "framer-motion";
 import { MapPin, Home as HomeIcon, ChevronRight, CalendarClock, ArrowRight, Flame, Trophy, Award, Zap, Leaf } from "lucide-react";

@@ -1,7 +1,7 @@
 import { Header } from "@/components/Header";
 import { CheckCircle2, ChevronRight, Download, Receipt } from "lucide-react";
 import Link from "next/link";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
@@ -54,17 +54,17 @@ export default async function CheckoutSuccess({ searchParams }: { searchParams: 
             <div className="space-y-4 mb-6">
                <div className="flex justify-between items-center text-gray-600">
                   <span className="font-bold text-sm">Subtotal</span>
-                  <span className="font-mono text-sm">{formatCurrency(transaction.subtotal)}</span>
+                  <span className="font-mono text-sm">{formatRupiah(transaction.subtotal)}</span>
                </div>
                <div className="flex justify-between items-center text-gray-600">
                   <span className="font-bold text-sm">Gateway Tax ({transaction.method})</span>
-                  <span className="font-mono text-sm">{formatCurrency(transaction.platformFee)}</span>
+                  <span className="font-mono text-sm">{formatRupiah(transaction.platformFee)}</span>
                </div>
             </div>
             
             <div className="flex justify-between items-center pt-4 border-t border-gray-100 mb-2">
                <span className="font-bold text-black text-lg">Total Paid</span>
-               <span className="font-mono text-xl text-emerald-600 font-bold">{formatCurrency(transaction.totalAmount)}</span>
+               <span className="font-mono text-xl text-emerald-600 font-bold">{formatRupiah(transaction.totalAmount)}</span>
             </div>
          </div>
 

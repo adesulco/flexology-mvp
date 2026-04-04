@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { formatRupiah } from "@/lib/format";
 import { redirect } from "next/navigation";
 import { CalendarClock, TrendingUp, Users, UserCheck, CalendarPlus, UserPlus, Search } from "lucide-react";
 import Link from "next/link";
@@ -75,7 +76,7 @@ export default async function PosDashboard() {
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Collected Revenue</p>
                   <p className="text-2xl font-black tracking-tighter text-gray-900 pt-1">
-                     Rp {revenueToday.toLocaleString('id-ID')}
+                     {formatRupiah(revenueToday)}
                   </p>
                 </div>
                 <div className="p-3 bg-green-50 text-green-600 rounded-xl">

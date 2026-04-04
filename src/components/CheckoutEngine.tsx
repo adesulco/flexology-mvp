@@ -1,9 +1,11 @@
 "use client";
 
+
 import { useState } from "react";
 import { CreditCard, QrCode, Building, ShieldCheck, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { processPosManualCheckout } from "@/app/actions/posCheckoutActions";
+import { formatRupiah } from "@/lib/format";
 
 // Extend window for Midtrans Snap
 declare global {
@@ -270,7 +272,7 @@ export default function CheckoutEngine({
                         </div>
                      </div>
                      <div className="text-right">
-                        <span className="text-xs font-bold text-gray-500">Rp {fees.va.toLocaleString('id-ID')} Fee</span>
+                        <span className="text-xs font-bold text-gray-500">{formatRupiah(fees.va)} Fee</span>
                      </div>
                   </button>
 
@@ -307,11 +309,11 @@ export default function CheckoutEngine({
             <div className="space-y-1 mb-4 flex flex-col items-end">
                <div className="flex justify-between items-center w-full px-2">
                   <span className="text-xs font-bold text-gray-400">Merchant Surcharge</span>
-                  <span className="text-sm font-bold font-mono text-gray-500">+ Rp {platformFee.toLocaleString('id-ID')}</span>
+                  <span className="text-sm font-bold font-mono text-gray-500">+ {formatRupiah(platformFee)}</span>
                </div>
-               <div className="flex justify-between items-center w-full px-2">
-                  <span className="text-lg font-bold text-black">Total to Deduct</span>
-                  <span className="text-2xl font-bold font-mono text-black">Rp {totalAmount.toLocaleString('id-ID')}</span>
+               <div className="flex justify-between items-center py-2 border-t border-gray-100 w-full px-2">
+                  <span className="text-lg font-bold text-black">Total Due</span>
+                  <span className="text-2xl font-bold font-mono text-black">{formatRupiah(totalAmount)}</span>
                </div>
             </div>
             <hr className="border-gray-100 mb-6" />

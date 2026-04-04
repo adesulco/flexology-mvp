@@ -1,7 +1,9 @@
 "use client";
+import { formatRate } from "@/lib/format";
+
 
 import { useBookingStore, Location, Service, Flexologist } from "@/store/useBookingStore";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 import { useState, useEffect, useMemo } from "react";
 import { format, addDays } from "date-fns";
 import { CheckCircle2, ChevronLeft, CalendarClock, ChevronRight, MapPin, Activity, Star, Tag, Sparkles, Clock, User, Flame } from "lucide-react";
@@ -9,7 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function BookingWizard() {
+import { Suspense } from "react";
+
+function BookingWizard() {
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [isMounted, setIsMounted] = useState(false);
@@ -228,111 +232,137 @@ export default function BookingWizard() {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        if (mode === null) {
           return (
-             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-               <h2 className="text-2xl font-bold tracking-tight mb-2">Service Type</h2>
-               <p className="text-flx-text-muted text-sm mb-4">How would you like to experience Flex?</p>
-               
-               <div className="bg-flx-teal/10 border border-flx-teal/20 text-flx-teal px-4 py-3 rounded-2xl text-xs font-bold tracking-tight mb-6 flex items-center gap-2 shadow-[0_0_15px_rgba(12,242,212,0.1)]">
-                 <Star className="w-4 h-4 fill-flx-teal text-flx-teal" /> Over 3,000+ recovery sessions completed in Indonesia
-               </div>
-
-               <div className="flex flex-col gap-4">
-                 <button 
-                    onClick={() => setMode('outlet')} 
-                    className="w-full text-left p-6 rounded-2xl border border-flx-border bg-flx-card hover:border-black active:scale-[0.98] transition-all flex items-center gap-4"
-                 >
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-flx-border shrink-0">
-                       <MapPin className="w-6 h-6 text-black" />
-                    </div>
-                    <div>
-                       <h3 className="font-bold text-lg text-black mb-1">In Studio</h3>
-                       <p className="text-xs text-flx-text-muted">Visit one of our premium recovery centers</p>
-                    </div>
-                 </button>
-                 <button 
-                    onClick={() => setMode('home')} 
-                    className="w-full text-left p-6 rounded-2xl border border-flx-border bg-flx-card hover:border-black active:scale-[0.98] transition-all flex items-center gap-4"
-                 >
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-flx-border shrink-0">
-                       <Activity className="w-6 h-6 text-black" />
-                    </div>
-                    <div>
-                       <h3 className="font-bold text-lg text-black mb-1">At-Home Service</h3>
-                       <p className="text-xs text-flx-text-muted">A Flexologist comes directly to your location</p>
-                    </div>
-                 </button>
-               </div>
-             </motion.div>
-          );
-        }
-
-        return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            {mode === 'outlet' ? (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight mb-2 flex items-center justify-between">Select Outlet <button onClick={() => setMode(null as any)} className="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Change Mode</button></h2>
-                <p className="text-flx-text-muted text-sm mb-6">Where would you like to recover today?</p>
-                <div className="flex flex-col gap-4">
-                  {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading outlets...</p>}
-                  {locations
-                     .filter(loc => flexologists.some(f => f.locationId === loc.id))
-                     .map(loc => (
-                    <div 
-                      key={loc.id} 
-                      onClick={() => setLocation(loc)}
-                      className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-                        selectedLocation?.id === loc.id 
-                        ? 'border-flx-teal bg-flx-teal/5 shadow-[0_0_15px_rgba(12,242,212,0.15)]' 
-                        : 'border-flx-border bg-flx-card hover:border-flx-teal/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-start gap-4">
-                          <div className={`p-2 rounded-full border border-flx-border ${selectedLocation?.id === loc.id ? 'bg-black text-white' : 'bg-white text-flx-text'}`}>
-                            <MapPin className="w-5 h-5" />
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col h-full">
+                <div className="flex-1">
+                 <h2 className="text-2xl font-bold tracking-tight mb-2">Service Type</h2>
+                 <p className="text-flx-text-muted text-sm mb-4">How would you like to experience Flex?</p>
+                 
+                 <div role="radiogroup" aria-label="Select service type" className="flex flex-col gap-3">
+                   <button
+                     type="button"
+                     onClick={() => setMode('outlet')}
+                     aria-pressed={mode === 'outlet'}
+                     role="radio"
+                     className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
+                       mode === 'outlet'
+                         ? 'border-black bg-black/5 ring-2 ring-black/20 shadow-md'
+                         : 'border-gray-200 bg-white hover:border-gray-300'
+                     }`}
+                   >
+                     <div className="flex items-center gap-3">
+                       {/* Checkmark icon — only visible when this option is selected */}
+                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                         mode === 'outlet'
+                           ? 'border-black bg-black'
+                           : 'border-gray-300 bg-white'
+                       }`}>
+                         {mode === 'outlet' && (
+                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                           </svg>
+                         )}
+                       </div>
+                       <div className="text-left">
+                         <span className="font-semibold text-base">In Studio</span>
+                         <p className="text-sm text-gray-500 mt-0.5">Visit one of our premium recovery centers</p>
+                       </div>
+                     </div>
+                   </button>
+                   <button
+                     type="button"
+                     onClick={() => setMode('home')}
+                     aria-pressed={mode === 'home'}
+                     role="radio"
+                     className={`w-full p-4 rounded-xl border-2 transition-all duration-200 ${
+                       mode === 'home'
+                         ? 'border-black bg-black/5 ring-2 ring-black/20 shadow-md'
+                         : 'border-gray-200 bg-white hover:border-gray-300'
+                     }`}
+                   >
+                     <div className="flex items-center gap-3">
+                       {/* Checkmark icon — only visible when this option is selected */}
+                       <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                         mode === 'home'
+                           ? 'border-black bg-black'
+                           : 'border-gray-300 bg-white'
+                       }`}>
+                         {mode === 'home' && (
+                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                           </svg>
+                         )}
+                       </div>
+                       <div className="text-left">
+                         <span className="font-semibold text-base">At-Home Service</span>
+                         <p className="text-sm text-gray-500 mt-0.5">A Flexologist comes directly to your location</p>
+                       </div>
+                     </div>
+                   </button>
+                 </div>
+                 
+                 {mode && (
+                    <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                       <h2 className="text-xl font-bold tracking-tight mb-4 flex items-center justify-between">
+                         {mode === 'outlet' ? 'Select Outlet' : 'Home Service Address'}
+                       </h2>
+                       {mode === 'outlet' ? (
+                          <div className="flex flex-col gap-4">
+                            {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading outlets...</p>}
+                            {locations.map(loc => (
+                              <button 
+                                key={loc.id} 
+                                onClick={() => setLocation(loc)}
+                                className={`text-left p-5 rounded-2xl border transition-all cursor-pointer ${
+                                  selectedLocation?.id === loc.id 
+                                  ? 'border-flx-teal bg-flx-teal/5 shadow-[0_0_15px_rgba(12,242,212,0.15)] ring-1 ring-flx-teal' 
+                                  : 'border-flx-border bg-flx-card hover:border-flx-teal/50'
+                                }`}
+                              >
+                                <div className="flex justify-between items-start">
+                                  <div className="flex items-start gap-4">
+                                    <div className={`p-2 rounded-full border border-flx-border ${selectedLocation?.id === loc.id ? 'bg-black text-white' : 'bg-white text-flx-text'}`}>
+                                      <MapPin className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <h3 className="font-bold text-lg leading-tight mb-1 text-flx-text">{loc.name}</h3>
+                                      <p className="text-xs text-flx-text-muted leading-relaxed line-clamp-2 pr-6">{loc.address}</p>
+                                    </div>
+                                  </div>
+                                  {selectedLocation?.id === loc.id && <CheckCircle2 className="w-5 h-5 text-flx-teal shrink-0 mt-1" />}
+                                </div>
+                              </button>
+                            ))}
                           </div>
-                          <div>
-                            <h3 className="font-bold text-lg leading-tight mb-1 text-flx-text">{loc.name}</h3>
-                            <p className="text-xs text-flx-text-muted leading-relaxed line-clamp-2 pr-6">{loc.address}</p>
+                       ) : (
+                          <div className="space-y-4">
+                            <div>
+                               <label className="text-[10px] uppercase font-bold tracking-widest text-flx-text-muted mb-1 block">Complete Address Details</label>
+                               <textarea 
+                                  value={homeAddress || ''} 
+                                  onChange={(e) => setHomeAddress(e.target.value)}
+                                  placeholder="Floor/Unit/Tower Number, Street Name, Block..."
+                                  rows={4}
+                                  className="w-full p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-flx-teal focus:border-flx-teal outline-none transition-all placeholder:text-gray-400"
+                               />
+                            </div>
+                            <div>
+                               <label className="text-[10px] uppercase font-bold tracking-widest text-flx-text-muted mb-1 block">Maps Link (Optional but recommended)</label>
+                               <input 
+                                  type="url" 
+                                  value={homeMapLink || ''} 
+                                  onChange={(e) => useBookingStore.setState({ homeMapLink: e.target.value })}
+                                  placeholder="https://maps.app.goo.gl/..."
+                                  className="w-full p-4 bg-flx-card border border-flx-border rounded-xl focus:ring-1 focus:ring-flx-teal focus:border-flx-teal outline-none transition-all placeholder:text-gray-400"
+                               />
+                            </div>
                           </div>
-                        </div>
-                      </div>
+                       )}
                     </div>
-                  ))}
+                 )}
                 </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold tracking-tight mb-2 flex items-center justify-between">Service Address <button onClick={() => setMode(null as any)} className="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Change Mode</button></h2>
-                <p className="text-flx-text-muted text-sm mb-6">Where should we send your therapist?</p>
-                <div className="flex flex-col gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-flx-text mb-2">Full Address</label>
-                    <textarea 
-                      value={homeAddress || ''}
-                      onChange={(e) => setHomeAddress(e.target.value, homeMapLink || undefined)}
-                      placeholder="Street name, apartment number, etc."
-                      className="w-full p-4 rounded-xl border border-flx-border bg-flx-card text-flx-text focus:outline-none focus:border-black focus:ring-1 focus:ring-black min-h-[100px] resize-none transition-all"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-flx-text mb-2">Google Maps Link <span className="text-flx-text-muted font-normal">(Optional)</span></label>
-                    <input 
-                      type="url"
-                      value={homeMapLink || ''}
-                      onChange={(e) => setHomeAddress(homeAddress || '', e.target.value)}
-                      placeholder="https://maps.app.goo.gl/..."
-                      className="w-full p-4 rounded-xl border border-flx-border bg-flx-card text-flx-text focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                    />
-                    <p className="text-xs text-flx-text-muted mt-2">Providing a pin helps your therapist find you faster.</p>
-                  </div>
-                </div>
-              </>
-            )}
-          </motion.div>
-        );
+              </motion.div>
+           );
       case 2:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -363,7 +393,7 @@ export default function BookingWizard() {
                     </div>
                     <div className="flex justify-between items-center text-sm font-semibold">
                       <span className="flex items-center gap-1.5 bg-flx-card border border-flx-border px-3 py-1.5 rounded-full"><Clock className="w-3.5 h-3.5 text-flx-teal" /> {srv.duration} min</span>
-                      <span className="text-flx-text">{formatCurrency(srv.price)}</span>
+                      <span className="text-flx-text">{formatRupiah(srv.price)}</span>
                     </div>
                   </div>
                 </div>
@@ -497,7 +527,7 @@ export default function BookingWizard() {
                   <p className="font-semibold text-base text-flx-text">{selectedService?.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">{formatCurrency(basePrice)}</p>
+                  <p className="font-mono text-base tracking-tight text-flx-text mb-0.5">{formatRupiah(basePrice)}</p>
                   <p className="text-[10px] bg-flx-card border border-flx-border px-2 py-0.5 rounded-md inline-block text-flx-text">{selectedService?.duration} min</p>
                 </div>
               </div>
@@ -507,7 +537,7 @@ export default function BookingWizard() {
                    <hr className="border-flx-border/30 border-dashed" />
                    <div className="flex justify-between items-center bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                      <span className="text-xs font-bold text-green-700 uppercase tracking-tight flex items-center gap-1.5"><Star className="w-3 h-3" /> {dbTier.replace('_', ' ')} Discount</span>
-                     <span className="text-xs font-mono font-bold text-green-600">-{formatCurrency(tierDiscountAmount)}</span>
+                     <span className="text-xs font-mono font-bold text-green-600">-{formatRupiah(tierDiscountAmount)}</span>
                    </div>
                  </>
               )}
@@ -517,7 +547,7 @@ export default function BookingWizard() {
                    <hr className="border-flx-border/30 border-dashed" />
                    <div className="flex justify-between items-center bg-yellow-50/80 p-2.5 rounded-xl border border-yellow-200">
                      <span className="text-xs font-bold text-yellow-800 uppercase tracking-tight flex items-center gap-1.5">⚡ AI Happy Hour</span>
-                     <span className="text-xs font-mono font-bold text-yellow-700">-{formatCurrency(aiDiscountAmount)}</span>
+                     <span className="text-xs font-mono font-bold text-yellow-700">-{formatRupiah(aiDiscountAmount)}</span>
                    </div>
                  </>
               )}
@@ -618,7 +648,7 @@ export default function BookingWizard() {
                           />
                           <div className="flex justify-between text-[10px] font-bold text-gray-400">
                              <span>0</span>
-                             <span>Max: {maxPointsAllowed.toLocaleString()}</span>
+                             <span>Max: {formatRate(maxPointsAllowed)}</span>
                           </div>
                        </motion.div>
                     )}
@@ -646,10 +676,10 @@ export default function BookingWizard() {
                <span className="font-bold text-white">Total Due</span>
                <div className="flex flex-col items-end">
                   {usePoints && pointsToUse > 0 && selectedService && (
-                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">{formatCurrency(priceAfterTierAndAI)}</span>
+                    <span className="text-xs text-gray-500 line-through mb-1 tracking-tight">{formatRupiah(priceAfterTierAndAI)}</span>
                   )}
                   <span className="text-xl font-mono text-white font-bold">
-                     {selectedService ? formatCurrency(priceAfterTierAndAI - (usePoints ? pointsToUse : 0)) : formatCurrency(0)}
+                     {selectedService ? formatRupiah(priceAfterTierAndAI - (usePoints ? pointsToUse : 0)) : formatRupiah(0)}
                   </span>
                </div>
             </div>
@@ -741,4 +771,12 @@ export default function BookingWizard() {
       </div>
     </div>
   );
+}
+
+export default function BookingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><div className="w-8 h-8 border-4 border-flx-teal border-t-transparent rounded-full animate-spin" /></div>}>
+      <BookingWizard />
+    </Suspense>
+  )
 }

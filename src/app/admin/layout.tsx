@@ -31,8 +31,8 @@ export default async function AdminLayout({
             <Link href="/admin/schedule" className="block px-4 py-2 rounded-lg hover:bg-white/10 text-white font-medium whitespace-nowrap transition-colors">
               Operations Pipeline
             </Link>
-            <Link href="/pos" className="block px-4 py-2 rounded-lg hover:bg-white/10 text-white font-medium whitespace-nowrap transition-colors">
-              Point of Sale
+            <Link href="/admin/pos" className="block px-4 py-2 rounded-lg hover:bg-white/10 text-white font-medium whitespace-nowrap transition-colors">
+              POS Terminal
             </Link>
             {isSuper && (
                <>

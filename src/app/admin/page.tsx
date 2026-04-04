@@ -1,9 +1,10 @@
+import { formatRate } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Activity, DollarSign, Users, Target } from "lucide-react";
 import { getTenant } from "@/lib/tenant";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -31,30 +32,34 @@ export default async function ExecutiveDashboard() {
   const confirmedBookings = bookings.filter(b => b.status === "CONFIRMED" || b.status === "COMPLETED").length;
   const voidedBookings = bookings.filter(b => b.status === "CANCELLED").length;
 
-  // 3. Outlet Leaderboard Math
-  const outletMap: Record<string, { name: string, volume: number, count: number }> = {};
+  // ONE query serves BOTH the KPI card and the leaderboard.
+  // Using the exact transaction array filtered to valid business states
+  const validBookings = bookings.filter(b => b.status === "COMPLETED" || b.status === "CONFIRMED");
+
+  // KPI calculation — sum all totalPrice values.
+  const totalRevenue = validBookings.reduce(
+    (sum, b) => sum + (Number(b.totalPrice) || 0), 0
+  );
+
+  // Leaderboard calculation — group by outlet name.
+  const outletMap = new Map<string, { sessions: number; revenue: number }>();
   
   // Pre-fill all active locations with 0
   allLocations.forEach(loc => {
-      outletMap[loc.id] = { name: loc.name, volume: 0, count: 0 };
-  });
-  bookings.forEach(b => {
-     if (b.status === "CANCELLED") return; // Don't count voided for leaderboard
-     
-     const id = b.location?.id || "HOME";
-     const name = b.location?.name || "Home Service";
-
-     if (!outletMap[id]) outletMap[id] = { name, volume: 0, count: 0 };
-     outletMap[id].count += 1;
-     // Note: we approximate revenue via service price if PaymentTransactions aren't strictly linked, 
-     // or just use `b.totalPrice`. We'll use booking's totalPrice.
-     outletMap[id].volume += Number(b.totalPrice || 0);
+    outletMap.set(loc.name, { sessions: 0, revenue: 0 });
   });
 
-  const leaderboard = Object.values(outletMap).sort((a, b) => b.volume - a.volume);
-  
-  // 2. Calculate Gross Revenue strictly from the aggregators to maintain parity
-  const totalRevenue = leaderboard.reduce((acc, curr) => acc + curr.volume, 0);
+  validBookings.forEach(b => {
+    const name = b.location?.name || 'Home Service';
+    const current = outletMap.get(name) || { sessions: 0, revenue: 0 };
+    current.sessions += 1;
+    current.revenue += Number(b.totalPrice) || 0;
+    outletMap.set(name, current);
+  });
+
+  const leaderboard = Array.from(outletMap.entries())
+    .map(([name, data]) => ({ name, count: data.sessions, volume: data.revenue }))
+    .sort((a, b) => b.volume - a.volume);
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-24">
@@ -71,7 +76,7 @@ export default async function ExecutiveDashboard() {
              </div>
              <div>
                <p className="text-gray-500 font-bold mb-1">Gross Settled Revenue</p>
-               <h3 className="text-3xl font-black text-gray-900">{formatCurrency(totalRevenue)}</h3>
+               <h3 className="text-3xl font-black text-gray-900">{formatRupiah(totalRevenue)}</h3>
              </div>
           </div>
 
@@ -81,7 +86,7 @@ export default async function ExecutiveDashboard() {
              </div>
              <div>
                <p className="text-gray-500 font-bold mb-1">Total Lifetime Bookings</p>
-               <h3 className="text-3xl font-black text-gray-900">{totalBookings.toLocaleString()}</h3>
+               <h3 className="text-3xl font-black text-gray-900">{formatRate(totalBookings)}</h3>
              </div>
           </div>
 
@@ -91,7 +96,7 @@ export default async function ExecutiveDashboard() {
              </div>
              <div>
                <p className="text-gray-500 font-bold mb-1">Confirmed Sessions</p>
-               <h3 className="text-3xl font-black text-gray-900">{confirmedBookings.toLocaleString()}</h3>
+               <h3 className="text-3xl font-black text-gray-900">{formatRate(confirmedBookings)}</h3>
              </div>
           </div>
 
@@ -101,7 +106,7 @@ export default async function ExecutiveDashboard() {
              </div>
              <div>
                <p className="text-gray-500 font-bold mb-1">Voided / Cancelled</p>
-               <h3 className="text-3xl font-black text-gray-900">{voidedBookings.toLocaleString()}</h3>
+               <h3 className="text-3xl font-black text-gray-900">{formatRate(voidedBookings)}</h3>
              </div>
           </div>
        </div>
@@ -126,7 +131,7 @@ export default async function ExecutiveDashboard() {
                      <td className="px-6 py-4 font-black text-gray-400">#{index + 1}</td>
                      <td className="px-6 py-4 font-bold text-gray-900">{l.name}</td>
                      <td className="px-6 py-4 font-medium text-gray-600">{l.count}</td>
-                     <td className="px-6 py-4 font-bold text-green-600">{formatCurrency(l.volume)}</td>
+                     <td className="px-6 py-4 font-bold text-green-600">{formatRupiah(l.volume)}</td>
                   </tr>
                ))}
              </tbody>

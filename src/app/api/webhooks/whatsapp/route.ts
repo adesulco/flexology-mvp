@@ -1,3 +1,4 @@
+import { formatRupiah, formatRate } from "@/lib/format";
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
                 if (textCommand.includes("BOOK")) {
                    replyText = `Hi ${user.name.split(' ')[0]}! Ready for a session? Fast-track your booking here: https://jemariapp.com/book?phone=${user.phoneNumber}`;
                 } else if (textCommand.includes("POINTS") || textCommand.includes("REWARDS")) {
-                   replyText = `You currently have ${user.points.toLocaleString()} FLX Points safely vaulted. You are on the ${user.tier.replace('_', ' ')} tier!`;
+                   replyText = `You currently have ${formatRate(user.points)} FLX Points safely vaulted. You are on the ${user.tier.replace('_', ' ')} tier!`;
                 } else if (textCommand.includes("CANCEL")) {
                    // Attempt auto-cancel of newest PENDING booking
                    const latestBooking = await prisma.booking.findFirst({

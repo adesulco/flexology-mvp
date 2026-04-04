@@ -1,4 +1,6 @@
-"use server"
+"use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -13,13 +15,13 @@ export async function createFlexologist(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
-  const rawName = formData.get("name") as string
+  const rawName = sanitizeText(formData.get("name") as string)
   const name = rawName.trim().replace(/\b\w/g, c => c.toUpperCase())
-  const specialty = formData.get("specialty") as string
+  const specialty = sanitizeText(formData.get("specialty") as string)
   let locationId = formData.get("locationId") as string
   const canHomeService = formData.get("canHomeService") === "on"
-  const shiftStart = formData.get("shiftStart") as string || "09:00"
-  const shiftEnd = formData.get("shiftEnd") as string || "20:00"
+  const shiftStart = sanitizeText(formData.get("shiftStart") as string) || "09:00"
+  const shiftEnd = sanitizeText(formData.get("shiftEnd") as string) || "20:00"
 
   if (session.role === 'OUTLET_MANAGER') {
      if (!session.managedLocationId) throw new Error("Manager lacks a designated outlet");
@@ -95,11 +97,11 @@ export async function adjustBooking(formData: FormData) {
   if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'OUTLET_MANAGER' && session.role !== 'GLOBAL_MANAGER')) throw new Error("Unauthorized");
 
   const bookingId = formData.get("bookingId") as string;
-  const scheduledDateStr = formData.get("scheduledDate") as string;
-  const totalPrice = parseInt(formData.get("totalPrice") as string);
+  const scheduledDateStr = sanitizeText(formData.get("scheduledDate") as string);
+  const totalPrice = parseInt(sanitizeText(formData.get("totalPrice") as string));
   const flexologistId = formData.get("flexologistId") as string;
   const status = formData.get("status") as any;
-  const homeAddress = formData.get("homeAddress") as string;
+  const homeAddress = sanitizeText(formData.get("homeAddress") as string);
 
   if (!bookingId) throw new Error("Missing ID");
 
@@ -145,11 +147,11 @@ export async function createLocation(formData: FormData) {
   const session = await getSession()
   if (session?.role !== 'SUPER_ADMIN' && session?.role !== 'GLOBAL_MANAGER') throw new Error("Unauthorized");
 
-  const name = formData.get("name") as string;
-  const address = formData.get("address") as string;
-  const mapLink = formData.get("mapLink") as string;
-  const openTime = formData.get("openTime") as string || "08:00";
-  const closeTime = formData.get("closeTime") as string || "22:00";
+  const name = sanitizeText(formData.get("name") as string);
+  const address = sanitizeText(formData.get("address") as string);
+  const mapLink = sanitizeText(formData.get("mapLink") as string);
+  const openTime = sanitizeText(formData.get("openTime") as string) || "08:00";
+  const closeTime = sanitizeText(formData.get("closeTime") as string) || "22:00";
 
   if (!name || !address) throw new Error("Missing required fields");
 
@@ -175,8 +177,8 @@ export async function updateLocationSettings(formData: FormData) {
    if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'OUTLET_MANAGER' && session.role !== 'GLOBAL_MANAGER')) throw new Error("Unauthorized");
    
    const locationId = formData.get("locationId") as string;
-   const openTime = formData.get("openTime") as string;
-   const closeTime = formData.get("closeTime") as string;
+   const openTime = sanitizeText(formData.get("openTime") as string);
+   const closeTime = sanitizeText(formData.get("closeTime") as string);
    const isActive = formData.get("isActive") === "true";
    
    await prisma.location.update({
@@ -190,8 +192,8 @@ export async function createOutletManager(formData: FormData) {
   const session = await getSession()
   if (session?.role !== 'SUPER_ADMIN' && session?.role !== 'GLOBAL_MANAGER') throw new Error("Unauthorized");
 
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const name = sanitizeText(formData.get("name") as string);
+  const email = sanitizeText(formData.get("email") as string);
   const password = formData.get("password") as string;
   const locationId = formData.get("locationId") as string;
   const accessLevel = formData.get("accessLevel") as "OUTLET_MANAGER" | "OUTLET_ADMIN";
@@ -220,8 +222,8 @@ export async function createGlobalManager(formData: FormData) {
   const session = await getSession()
   if (session?.role !== 'SUPER_ADMIN') throw new Error("Unauthorized");
 
-  const name = formData.get("name") as string;
-  const phoneNumber = formData.get("phoneNumber") as string;
+  const name = sanitizeText(formData.get("name") as string);
+  const phoneNumber = sanitizeText(formData.get("phoneNumber") as string);
   const password = formData.get("password") as string;
 
   if (!name || !phoneNumber || !password) throw new Error("Missing required fields");

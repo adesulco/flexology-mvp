@@ -1,10 +1,12 @@
 "use client";
 
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { searchPosCustomer, createPosBooking } from "@/app/actions/posActions";
-import { Search, UserCheck, Flame, UserPlus, CheckCircle2 } from "lucide-react";
+import { Search, UserCheck, UserPlus, Calendar, Clock, MapPin, User, Tag, Check, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { formatRupiah } from "@/lib/format";
 
 export default function NewBookingClient({ locations, services, flexologists, sessionLocationId }: any) {
   const router = useRouter();
@@ -198,7 +200,7 @@ export default function NewBookingClient({ locations, services, flexologists, se
                >
                   <option value="">-- Select Service --</option>
                   {services.map((s: any) => (
-                     <option key={s.id} value={s.id}>{s.name} ({s.duration}m) - Rp {s.price.toLocaleString('id-ID')}</option>
+                     <option key={s.id} value={s.id}>{s.name} ({s.duration}m) - {formatRupiah(s.price)}</option>
                   ))}
                </select>
              </div>

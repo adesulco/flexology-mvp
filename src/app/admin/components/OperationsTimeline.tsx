@@ -1,10 +1,11 @@
 "use client";
 
+
 import { useState, useMemo } from "react";
 import { format, addDays, subDays, isSameDay, startOfDay, endOfDay } from "date-fns";
 import { CheckCircle2, Clock, MapPin, Activity, X, Settings2, Calendar, List, ChevronLeft, ChevronRight, UserPlus } from "lucide-react";
 import { adjustBooking, voidBooking } from "@/app/actions/adminActions";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 
 const START_HOUR = 8; // 8:00 AM
 const END_HOUR = 22; // 10:00 PM
@@ -425,7 +426,7 @@ export default function OperationsTimeline({
                            <Activity className="w-4 h-4 text-flx-teal opacity-70" />
                            <div>
                               <p className="font-semibold text-gray-900">{b.service?.name || "Service"}</p>
-                              <p className="text-[10px] font-mono text-emerald-600 font-bold">{formatCurrency(b.totalPrice)} &nbsp;•&nbsp; <span className="text-gray-500">{b.service?.duration || 60} mins</span></p>
+                              <p className="text-[10px] font-mono text-emerald-600 font-bold">{formatRupiah(b.totalPrice)} &nbsp;•&nbsp; <span className="text-gray-500">{b.service?.duration || 60} mins</span></p>
                            </div>
                          </div>
                        </td>
@@ -521,7 +522,7 @@ export default function OperationsTimeline({
                              <p className="font-bold text-gray-900">{selectedBooking.service?.name}</p>
                              <p className="text-sm text-gray-500">{selectedBooking.service?.duration} Minutes</p>
                           </div>
-                          <p className="font-mono font-bold text-emerald-700">{formatCurrency(selectedBooking.totalPrice)}</p>
+                          <p className="font-mono font-bold text-emerald-700">{formatRupiah(selectedBooking.totalPrice)}</p>
                        </div>
                     </div>
 

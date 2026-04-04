@@ -1,3 +1,4 @@
+import { formatRupiah, formatRate } from "@/lib/format";
 import { User, Settings, CreditCard, Shield, HelpCircle, LogOut, ChevronRight, Share } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -88,7 +89,7 @@ export default async function Profile() {
            
            <div className="col-span-2 bg-gradient-to-tr from-flx-teal/10 to-blue-500/5 border border-flx-teal/20 rounded-xl p-4 flex items-center justify-between">
               <div>
-                 <span className="text-3xl font-bold font-mono text-black">{userData.points.toLocaleString()}</span>
+                 <span className="text-3xl font-bold font-mono text-black">{formatRate(userData.points)}</span>
                  <p className="text-xs font-bold text-flx-teal uppercase tracking-wider">Available FLX Points</p>
               </div>
               <div className="text-right">

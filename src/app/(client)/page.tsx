@@ -1,61 +1,44 @@
-import { getSession } from "@/lib/auth";
-import { LandingPageUI } from '@/components/LandingPageUI';
-import { prisma } from "@/lib/prisma";
-import { getTenant } from "@/lib/tenant";
+
+
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-import { DynamicAppHomepageUI } from '@/components/DynamicAppHomepageUI';
+// This function renders static HTML from the server. It requires zero JavaScript.
+// Users will see this content within 1 second of page load.
+function StaticHeroShell() {
+  return (
+    <main className="bg-black min-h-screen text-white">
+      <div className="flex flex-col items-center pt-12 px-6">
+        <img src="/logo.png" alt="Flexology" width={80} height={80} />
+        <h1 className="text-3xl font-bold mt-6">Unlock Your True Potential</h1>
+        <p className="text-gray-400 mt-3 text-center">
+          Premium sports recovery, targeted massage, and elite physical therapy.
+        </p>
+        <a
+          href="/book"
+          className="mt-8 w-full py-4 bg-white text-black font-bold rounded-xl text-center block"
+        >
+          BOOK A SESSION
+        </a>
+      </div>
+    </main>
+  );
+}
 
-import { DynamicMarketplaceHomepageUI } from '@/components/DynamicMarketplaceHomepageUI';
+// Animations load ONLY after the static shell has already been painted.
+// ssr: false ensures this never blocks server-side rendering.
+const AnimatedContent = dynamic(
+  () => import('../../components/AnimatedHomepage'),
+  { loading: () => null }
+);
 
-export const revalidate = 60;
-
-export default async function Home() {
-  const session = await getSession();
-  const tenant = await getTenant();
-
-  // ROUTING BIFURCATION: Master Platform vs Tenant App
-  if (!tenant) {
-      const [allBrands, allServices] = await Promise.all([
-          prisma.tenant.findMany({ where: { isActive: true }, take: 10 }),
-          prisma.service.findMany({ where: { isActive: true }, include: { tenant: true }, take: 10, orderBy: { price: 'desc' } })
-      ]);
-      
-      return <DynamicMarketplaceHomepageUI brands={allBrands} services={allServices} />;
-  }
-
-  // If the user has a valid login cookie, show the Mobile App Booking Dashboard
-  if (session && session.userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId as string },
-      select: {
-         id: true,
-         name: true,
-         points: true,
-         tier: true,
-         currentStreak: true,
-         longestStreak: true,
-         badges: true
-      }
-    });
-    
-    if (user) {
-       const lastBooking = await prisma.booking.findFirst({
-          where: { userId: user.id, tenantId: tenant?.id, status: { in: ['COMPLETED', 'CONFIRMED'] } },
-          orderBy: { scheduledDate: 'desc' },
-          include: { service: true, location: true, flexologist: true }
-       });
-       
-       return <DynamicAppHomepageUI user={user} lastBooking={lastBooking} tenant={tenant} />;
-    }
-  }
-
-  // If they are not logged in, show the Preliminary Landing Page 
-  const services = await prisma.service.findMany({
-     where: { tenantId: tenant?.id, isActive: true },
-     take: 6,
-     orderBy: { price: 'asc' }
-  });
-
-  return <LandingPageUI services={services} tenant={tenant} />;
+export default function HomePage() {
+  return (
+    <>
+      <StaticHeroShell />
+      <Suspense fallback={null}>
+        <AnimatedContent />
+      </Suspense>
+    </>
+  );
 }

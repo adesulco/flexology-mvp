@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/Header";
 import { getTenant } from "@/lib/tenant";
-import { formatCurrency } from "@/lib/formatters";
+import { formatRupiah } from "@/lib/format";
 import Link from "next/link";
 import { Star, Clock } from "lucide-react";
 
@@ -35,7 +35,7 @@ export default async function ServicesCatalogPage() {
                          </div>
                       </div>
                       <span className="bg-white/10 px-3 py-1.5 rounded-full text-xs font-mono tracking-widest text-white">
-                         {formatCurrency(service.price)}
+                         {formatRupiah(service.price)}
                       </span>
                    </div>
                    

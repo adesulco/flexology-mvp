@@ -1,8 +1,10 @@
 "use client";
 
+
 import { useState } from "react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { formatRupiah } from "@/lib/format";
 import { Printer, Calendar, Banknote, CreditCard, Building, QrCode, TrendingUp, Users, ArrowDownToLine } from "lucide-react";
 
 export default function ReportsClient({ tx, metrics, currentDate }: any) {
@@ -52,7 +54,7 @@ export default function ReportsClient({ tx, metrics, currentDate }: any) {
            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 p-6 text-emerald-100"><TrendingUp className="w-16 h-16 opacity-30 transform translate-x-4 -translate-y-4"/></div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Gross Terminal Volume</p>
-              <p className="text-3xl font-black text-gray-900 tracking-tighter">Rp {(metrics.grandTotal / 1000).toLocaleString()}K</p>
+              <p className="text-3xl font-black text-gray-900 tracking-tighter">{formatRupiah(metrics.grandTotal)}</p>
            </div>
 
            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
@@ -69,7 +71,7 @@ export default function ReportsClient({ tx, metrics, currentDate }: any) {
 
            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm relative overflow-hidden">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Cash Drawer Expected</p>
-              <p className="text-3xl font-black text-amber-600 tracking-tighter">Rp {(metrics.totalCash / 1000).toLocaleString()}K</p>
+              <p className="text-3xl font-black text-amber-600 tracking-tighter">{formatRupiah(metrics.totalCash)}</p>
            </div>
 
         </div>
@@ -106,7 +108,7 @@ export default function ReportsClient({ tx, metrics, currentDate }: any) {
                           {t.paymentMethod.includes('DIGITAL') && <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase"><QrCode className="w-3 h-3"/> Gateway</span>}
                        </td>
                        <td className="px-6 py-4 text-gray-600">{t.booking?.service?.name || "Manual TX"}</td>
-                       <td className="px-6 py-4 text-right font-black font-mono text-gray-900">Rp {t.total.toLocaleString()}</td>
+                       <td className="px-6 py-4 text-right font-black font-mono text-gray-900">{formatRupiah(t.total)}</td>
                     </tr>
                  ))}
               </tbody>

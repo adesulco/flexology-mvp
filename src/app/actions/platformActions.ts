@@ -1,4 +1,6 @@
-"use server"
+"use server";
+import { sanitizeText } from "@/lib/sanitize";
+
 
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
@@ -10,9 +12,9 @@ export async function provisionTenant(formData: FormData) {
     throw new Error("Unauthorized: Only Jemari Platform Owners can provision new SaaS instances.");
   }
 
-  const name = formData.get("name") as string;
-  const slug = formData.get("slug") as string;
-  const colorHex = formData.get("colorHex") as string;
+  const name = sanitizeText(formData.get("name") as string);
+  const slug = sanitizeText(formData.get("slug") as string);
+  const colorHex = sanitizeText(formData.get("colorHex") as string);
 
   if (!name || !slug) throw new Error("Missing required parameters for deployment");
 

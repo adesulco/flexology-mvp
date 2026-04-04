@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState } from "react";
 import { addWalkIn, assignWalkInToBooking, cancelWalkIn } from "@/app/actions/posWalkinActions";
 import { Clock, UserPlus, X, Check, Activity, AlertCircle } from "lucide-react";

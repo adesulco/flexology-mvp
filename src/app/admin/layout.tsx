@@ -40,7 +40,7 @@ export default async function AdminLayout({
                    Staff Management
                  </Link>
                  <Link href="/admin/outlets" className="block px-4 py-2 rounded-lg hover:bg-white/10 text-white font-medium whitespace-nowrap transition-colors">
-                   Outlets & Operations
+                   Outlets Management
                  </Link>
                  <Link href="/admin/settings" className="block px-4 py-2 rounded-lg hover:bg-white/10 text-white font-medium whitespace-nowrap transition-colors">
                    System Variables

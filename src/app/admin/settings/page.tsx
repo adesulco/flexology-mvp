@@ -87,7 +87,7 @@ export default async function SettingsPage() {
             <h3 className="font-bold text-sm text-black">Membership Tiers CRM</h3>
             <span className="text-xs px-2 py-0.5 bg-black text-white rounded-md font-bold uppercase tracking-wider">3 ACTIVE</span>
          </div>
-         <div className="p-5 space-y-8">
+         <div className="p-5 space-y-8 overflow-x-auto">
             {tiers.map((tier) => (
                <ConfirmForm action={updateMembershipTier} key={tier.id} className="relative p-5 rounded-xl border border-gray-200 bg-gray-50/50">
                    <div className="absolute top-0 right-5 transform -translate-y-1/2 bg-white text-gray-500 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border shadow-sm">

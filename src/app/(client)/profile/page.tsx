@@ -9,7 +9,7 @@ import { MysteryBoxBanner } from "./MysteryBoxClient";
 
 export default async function Profile() {
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session?.userId) redirect('/login');
 
   // Fetch real database metrics
   const userData = await prisma.user.findUnique({

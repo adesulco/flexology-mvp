@@ -2,17 +2,25 @@ import DOMPurify from 'isomorphic-dompurify';
 
 // Strip ALL HTML — for text-only fields (names, addresses)
 export function sanitizeText(input: string): string {
-  if (!input) return "";
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] }).trim();
+  try {
+    if (!input) return "";
+    return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] }).trim();
+  } catch (e) {
+    return "";
+  }
 }
 
 // Allow basic formatting — for rich text fields
 export function sanitizeRichText(input: string): string {
-  if (!input) return "";
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],
-    ALLOWED_ATTR: [],
-  }).trim();
+  try {
+    if (!input) return "";
+    return DOMPurify.sanitize(input, {
+      ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'p', 'br'],
+      ALLOWED_ATTR: [],
+    }).trim();
+  } catch (e) {
+    return "";
+  }
 }
 
 // Validate and sanitize specific field types

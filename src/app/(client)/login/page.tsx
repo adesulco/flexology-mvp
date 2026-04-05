@@ -6,19 +6,28 @@ import { login } from "@/app/actions/authActions";
 import Link from "next/link";
 import { PasswordInput } from "@/components/PasswordInput";
 
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const formData = new FormData(e.currentTarget);
     const result = await login(formData);
     
-    if (result?.error) {
-      setError(result.error);
+    if (result?.error || !result?.success) {
+      setError(result?.error || "Login failed.");
       setLoading(false);
+      return;
+    }
+
+    if (result.success && result.redirectUrl) {
+      router.push(result.redirectUrl);
     }
   }
 

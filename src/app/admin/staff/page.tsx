@@ -14,14 +14,14 @@ export default async function StaffManagement() {
 
   const staff = await prisma.flexologist.findMany({
     where: session.role === "OUTLET_MANAGER" 
-      ? { locationId: session.managedLocationId as string, tenantId: tenant?.id } 
-      : { tenantId: tenant?.id },
+      ? { locationId: session.managedLocationId as string, ...(tenant ? { tenantId: tenant.id } : {}) } 
+      : { ...(tenant ? { tenantId: tenant.id } : {}) },
     include: { location: true },
     orderBy: { name: "asc" }
   });
 
   const locations = await prisma.location.findMany({
-    where: { isActive: true, tenantId: tenant?.id }
+    where: { isActive: true, ...(tenant ? { tenantId: tenant.id } : {}) }
   });
 
   return (

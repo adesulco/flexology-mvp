@@ -12,9 +12,14 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      const decoded = await verifyToken(token);
+      const decoded = await verifyToken(token) as any;
       if (!decoded) {
         throw new Error('Invalid token');
+      }
+
+      const validRoles = ['admin', 'superadmin', 'SUPER_ADMIN', 'GLOBAL_MANAGER', 'OUTLET_MANAGER'];
+      if (!validRoles.includes(decoded.role as string)) {
+         return NextResponse.redirect(new URL('/login', request.url));
       }
 
       // SECURITY: Block tokens for test accounts (from Mission 3)

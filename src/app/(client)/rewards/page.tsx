@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function Rewards() {
   const session = await getSession();
-  if (!session?.userId) redirect('/?clear=true');
+  if (!session?.userId) redirect('/login');
 
   const userData = await prisma.user.findUnique({
     where: { id: session.userId as string },
@@ -23,7 +23,7 @@ export default async function Rewards() {
   });
   const referralPoints = referralPointsSetting ? parseInt(referralPointsSetting.value) : 50000;
 
-  if (!userData) redirect('/?clear=true');
+  if (!userData) redirect('/login');
 
   const points = userData.points;
   const nextTarget = 2000;
@@ -45,7 +45,7 @@ export default async function Rewards() {
            <div>
              <div className="flex justify-between text-xs text-flx-text-muted mb-2 font-bold uppercase tracking-wider">
                 <span>{userData.tier.replace('_', ' ')} Tier</span>
-                <span>{Math.max(nextTarget - points, 0).toLocaleString()} to Gold</span>
+                <span>{formatRate(Math.max(nextTarget - points, 0))} to Gold</span>
              </div>
              <div className="h-2.5 w-full bg-black/10 rounded-full overflow-hidden">
                 <div 

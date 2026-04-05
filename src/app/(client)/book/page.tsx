@@ -368,11 +368,13 @@ function BookingWizard() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <h2 className="text-2xl font-bold tracking-tight mb-2">Choose Service</h2>
             <p className="text-flx-text-muted text-sm mb-6">Select a targeted recovery technique.</p>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" role="radiogroup" aria-label="Select Service">
               {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading services...</p>}
               {services.map(srv => (
                 <div 
                   key={srv.id} 
+                  role="radio"
+                  aria-checked={selectedService?.id === srv.id}
                   onClick={() => setService(srv)}
                   className={`p-5 rounded-2xl border transition-all cursor-pointer ${
                     selectedService?.id === srv.id 
@@ -409,12 +411,14 @@ function BookingWizard() {
             
             <div className="mb-8">
               <h3 className="text-sm font-medium mb-3 text-flx-text">Date Selection</h3>
-              <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6">
+              <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide -mx-6 px-6" role="radiogroup" aria-label="Select Date">
                 {upcomingDates.map(date => {
                   const isSelected = selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
                   return (
                     <div 
                       key={date.toISOString()}
+                      role="radio"
+                      aria-checked={!!isSelected}
                       onClick={() => setDate(date)}
                       className={`min-w-[70px] flex flex-col items-center justify-center p-3 rounded-2xl border cursor-pointer flex-shrink-0 transition-colors ${
                         isSelected ? 'bg-flx-teal border-flx-teal text-white' : 'bg-flx-card border-flx-border text-flx-text hover:border-flx-teal/50'
@@ -432,10 +436,12 @@ function BookingWizard() {
               <h3 className="font-bold text-sm text-flx-text mb-3 flex items-center justify-between">
                  <span>Time Slots</span>
               </h3>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3" role="radiogroup" aria-label="Select Time">
                 {timeSlots.map(slot => (
                   <div 
                     key={slot.time}
+                    role="radio"
+                    aria-checked={selectedTime === slot.time}
                     onClick={() => {
                         setTime(slot.time);
                         setIsHappyHourActive(slot.isHappyHour);
@@ -458,7 +464,7 @@ function BookingWizard() {
             <h2 className="text-2xl font-bold tracking-tight mb-2">Select Flexologist</h2>
             <p className="text-flx-text-muted text-sm mb-6">Choose an expert for your session.</p>
             
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" role="radiogroup" aria-label="Select Flexologist">
               {isLoading && <p className="text-sm text-flx-text-muted animate-pulse">Loading staff...</p>}
               {!isLoading && availableFlexologists.length === 0 && (
                  <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm">
@@ -468,6 +474,8 @@ function BookingWizard() {
               
               {!isLoading && availableFlexologists.length > 0 && (
                   <div 
+                      role="radio"
+                      aria-checked={selectedFlexologist?.id === "any"}
                       onClick={() => setFlexologist({ id: "any", name: "Any Available", rating: 4.9, reviews: 0, specialty: [], imageUrl: "" })}
                       className={`p-4 rounded-2xl border flex items-center gap-4 cursor-pointer transition-colors ${
                         selectedFlexologist?.id === "any" ? 'border-flx-teal bg-flx-teal/5' : 'border-flx-border bg-white hover:border-flx-teal/50'
@@ -485,6 +493,8 @@ function BookingWizard() {
               {availableFlexologists.map(flex => (
                 <div 
                   key={flex.id}
+                  role="radio"
+                  aria-checked={selectedFlexologist?.id === flex.id}
                   onClick={() => setFlexologist(flex)}
                   className={`p-4 rounded-2xl border flex gap-4 cursor-pointer transition-colors ${
                     selectedFlexologist?.id === flex.id ? 'border-flx-teal bg-flx-teal/5' : 'border-flx-border bg-white hover:border-flx-teal/50'
@@ -596,7 +606,7 @@ function BookingWizard() {
                        <h3 className="font-bold text-flx-teal text-sm flex items-center gap-2">
                           <Activity className="w-4 h-4" /> Apply FLX Reward Points
                        </h3>
-                       <p className="text-[10px] text-gray-500 mt-1">Avail Balance: <span className="font-bold">{dbPoints.toLocaleString()} PTS</span></p>
+                       <p className="text-[10px] text-gray-500 mt-1">Avail Balance: <span className="font-bold">{formatRate(dbPoints)} PTS</span></p>
                     </div>
                     
                     {/* Native Toggle Switch */}

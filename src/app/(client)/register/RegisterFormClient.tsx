@@ -9,21 +9,30 @@ import { Copyleft } from "lucide-react";
 import { PasswordInput } from "@/components/PasswordInput";
 import { formatRupiah } from "@/lib/format";
 
+import { useRouter } from "next/navigation";
+
 export default function RegisterFormClient({ bonus }: { bonus: string }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const rawBonus = parseInt(bonus, 10);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const formData = new FormData(e.currentTarget);
     const result = await register(formData);
     
-    if (result?.error) {
-      setError(result.error);
+    if (result?.error || !result?.success) {
+      setError(result?.error || "Registration failed.");
       setLoading(false);
+      return;
+    }
+
+    if (result.success && result.redirectUrl) {
+      router.push(result.redirectUrl);
     }
   }
 

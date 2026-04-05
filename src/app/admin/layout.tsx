@@ -4,12 +4,35 @@ import { Copyleft, LogOut } from "lucide-react"; // Dummy icon for flexology
 import { getSession } from "@/lib/auth";
 import SignOutButton from "./components/SignOutButton";
 
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
+import { redirect } from 'next/navigation';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_super_secret_flexology_string_for_local_dev");
+
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  const cookieStore = await cookies();
+  const token = cookieStore.get('flex_session')?.value;
+
+  if (!token) {
+    redirect('/login');
+  }
+
+  let session;
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (payload.role !== 'admin' && payload.role !== 'superadmin' && payload.role !== 'SUPER_ADMIN' && payload.role !== 'OUTLET_MANAGER' && payload.role !== 'GLOBAL_MANAGER') {
+      redirect('/login');
+    }
+    session = payload;
+  } catch {
+    redirect('/login');
+  }
+
   const isSuper = session?.role === "SUPER_ADMIN" || session?.role === "GLOBAL_MANAGER";
 
   return (
@@ -19,7 +42,7 @@ export default async function AdminLayout({
            <Copyleft className="w-8 h-8 text-flx-teal" />
            <div className="flex items-end gap-2">
               <h1 className="text-xl font-bold tracking-tight leading-none">Flex Admin</h1>
-              <span className="text-[10px] font-mono text-gray-500 font-bold bg-white/10 px-1.5 py-0.5 rounded leading-none mb-0.5">v0.9.1</span>
+              <span className="text-[10px] font-mono text-gray-500 font-bold bg-white/10 px-1.5 py-0.5 rounded leading-none mb-0.5">v0.10.0</span>
            </div>
          </div>
          <nav className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0">

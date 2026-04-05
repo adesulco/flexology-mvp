@@ -27,17 +27,14 @@ function StaticHeroShell() {
 
 // Animations load ONLY after the static shell has already been painted.
 // ssr: false ensures this never blocks server-side rendering.
-const AnimatedContent = dynamic(
-  () => import('../../components/AnimatedHomepage'),
-  { loading: () => null }
-);
+import { AnimatedHomepageClient } from '../../components/AnimatedClientWrapper';
 
 export default function HomePage() {
   return (
     <>
       <StaticHeroShell />
       <Suspense fallback={null}>
-        <AnimatedContent />
+        <AnimatedHomepageClient />
       </Suspense>
     </>
   );

@@ -6,13 +6,31 @@ import { Activity, DollarSign, Users, Target } from "lucide-react";
 import { getTenant } from "@/lib/tenant";
 import { formatRupiah } from "@/lib/format";
 
+import { cookies } from 'next/headers';
+import { jwtVerify } from 'jose';
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback_super_secret_flexology_string_for_local_dev");
+
 export const dynamic = "force-dynamic";
 
 export default async function ExecutiveDashboard() {
-  const session = await getSession();
-  if (!session || !['SUPER_ADMIN', 'GLOBAL_MANAGER'].includes(session.role as string)) {
-    redirect("/admin/schedule");
+  const cookieStore = await cookies();
+  const token = cookieStore.get('flex_session')?.value;
+
+  if (!token) {
+    redirect('/login');
   }
+
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (payload.role !== 'admin' && payload.role !== 'superadmin' && payload.role !== 'SUPER_ADMIN' && payload.role !== 'GLOBAL_MANAGER') {
+      redirect("/admin/schedule");
+    }
+  } catch {
+    redirect('/login');
+  }
+
+  const session = await getSession();
 
   const tenant = await getTenant();
 

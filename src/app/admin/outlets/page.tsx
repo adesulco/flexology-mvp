@@ -15,7 +15,7 @@ export default async function OutletsManagement() {
   const tenant = await getTenant();
 
   const locations = await prisma.location.findMany({
-    where: { tenantId: tenant?.id },
+    where: { ...(tenant ? { tenantId: tenant.id } : {}) },
     orderBy: { name: "asc" }
   });
 

@@ -40,10 +40,48 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Non-admin routes → pass through
+  // Handle Profile Route
+  const isProfileRoute = pathname.startsWith('/profile');
+  if (isProfileRoute) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    try {
+      const decoded = await verifyToken(token) as any;
+      if (!decoded) throw new Error('Invalid token');
+    } catch {
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('flex_session');
+      return response;
+    }
+  }
+
+  // Handle POS Route
+  const isPosRoute = pathname.startsWith('/pos');
+  if (isPosRoute && !pathname.startsWith('/pos/login')) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/pos/login', request.url));
+    }
+    
+    try {
+      const decoded = await verifyToken(token) as any;
+      if (!decoded) throw new Error('Invalid token');
+      
+      const validPosRoles = ['OUTLET_ADMIN', 'OUTLET_MANAGER', 'SUPER_ADMIN', 'GLOBAL_MANAGER'];
+      if (!validPosRoles.includes(decoded.role as string)) {
+         return NextResponse.redirect(new URL('/pos/login', request.url));
+      }
+    } catch {
+      const response = NextResponse.redirect(new URL('/pos/login', request.url));
+      response.cookies.delete('flex_session');
+      return response;
+    }
+  }
+
+  // Non-restricted routes → pass through
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/profile/:path*', '/pos/:path*'],
 };
